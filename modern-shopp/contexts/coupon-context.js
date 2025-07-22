@@ -9,7 +9,7 @@ export function CouponProvider({ children }) {
   const [appliedCoupon, setAppliedCoupon] = useState(null)
   const { toast } = useToast()
 
-  // Cupones disponibles (en producción vendrían de una API)
+  // Cupones disponibles
   const availableCoupons = [
     {
       code: "WELCOME10",

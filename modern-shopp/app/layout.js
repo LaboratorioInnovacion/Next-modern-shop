@@ -15,24 +15,12 @@ export const metadata = {
   title: "ModernShop - Tu tienda online premium",
   description:
     "Descubre productos de calidad premium con la mejor experiencia de compra online. Envío gratis, devoluciones fáciles y atención al cliente 24/7.",
-  keywords: "tienda online, productos premium, tecnología, moda, hogar, deportes",
-  authors: [{ name: "ModernShop Team" }],
-  viewport: "width=device-width, initial-scale=1",
-  themeColor: "#1e293b",
     generator: 'v0.dev'
 }
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="es" className="dark">
       <body className="font-inter antialiased">
         <ThemeProvider>
           <ToastProvider>

@@ -51,6 +51,12 @@ const cartReducer = (state, action) => {
         isOpen: !state.isOpen,
       }
 
+    case "LOAD_CART":
+      return {
+        ...state,
+        items: action.payload || [],
+      }
+
     default:
       return state
   }
@@ -62,19 +68,26 @@ export function CartProvider({ children }) {
     isOpen: false,
   })
 
-  // Persistir carrito en localStorage
+  // Cargar carrito del localStorage al iniciar
   useEffect(() => {
-    const savedCart = localStorage.getItem("modernshop-cart")
-    if (savedCart) {
-      const parsedCart = JSON.parse(savedCart)
-      parsedCart.items.forEach((item) => {
-        dispatch({ type: "ADD_TO_CART", payload: item })
-      })
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("modernshop-cart")
+      if (savedCart) {
+        try {
+          const parsedCart = JSON.parse(savedCart)
+          dispatch({ type: "LOAD_CART", payload: parsedCart.items || [] })
+        } catch (error) {
+          console.error("Error loading cart:", error)
+        }
+      }
     }
   }, [])
 
+  // Guardar carrito en localStorage cuando cambie
   useEffect(() => {
-    localStorage.setItem("modernshop-cart", JSON.stringify(state))
+    if (typeof window !== "undefined") {
+      localStorage.setItem("modernshop-cart", JSON.stringify(state))
+    }
   }, [state])
 
   const addToCart = (product) => {

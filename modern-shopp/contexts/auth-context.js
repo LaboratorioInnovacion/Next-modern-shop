@@ -67,23 +67,27 @@ export function AuthProvider({ children }) {
 
   // Verificar si hay usuario guardado al cargar
   useEffect(() => {
-    const savedUser = localStorage.getItem("modernshop-user")
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser)
-        dispatch({ type: "LOGIN_SUCCESS", payload: user })
-      } catch (error) {
-        localStorage.removeItem("modernshop-user")
+    if (typeof window !== "undefined") {
+      const savedUser = localStorage.getItem("modernshop-user")
+      if (savedUser) {
+        try {
+          const user = JSON.parse(savedUser)
+          dispatch({ type: "LOGIN_SUCCESS", payload: user })
+        } catch (error) {
+          localStorage.removeItem("modernshop-user")
+        }
       }
     }
   }, [])
 
   // Guardar usuario en localStorage cuando cambie
   useEffect(() => {
-    if (state.user) {
-      localStorage.setItem("modernshop-user", JSON.stringify(state.user))
-    } else {
-      localStorage.removeItem("modernshop-user")
+    if (typeof window !== "undefined") {
+      if (state.user) {
+        localStorage.setItem("modernshop-user", JSON.stringify(state.user))
+      } else {
+        localStorage.removeItem("modernshop-user")
+      }
     }
   }, [state.user])
 
@@ -94,9 +98,8 @@ export function AuthProvider({ children }) {
       // Simular llamada a API
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      // Validación básica (en producción sería contra una API real)
+      // Validación básica
       if (email && password.length >= 6) {
-        // Limpiar email de espacios
         const cleanEmail = email.trim().toLowerCase()
 
         const user = {
@@ -124,7 +127,6 @@ export function AuthProvider({ children }) {
     dispatch({ type: "LOGIN_START" })
 
     try {
-      // Simular llamada a API
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       const { name, email, password } = userData

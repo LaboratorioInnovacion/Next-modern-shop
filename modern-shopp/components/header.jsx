@@ -117,7 +117,11 @@ export default function Header() {
                     size="icon"
                     className="hover:bg-slate-800 transition-all duration-300 w-10 h-10 flex items-center justify-center"
                   >
-                    <img src={user?.avatar || "/placeholder.svg"} alt={user?.name} className="w-6 h-6 rounded-full" />
+                    <img
+                      src={user?.avatar || "https://ui-avatars.com/api/?name=User&background=3b82f6&color=fff"}
+                      alt={user?.name}
+                      className="w-6 h-6 rounded-full"
+                    />
                   </Button>
                   <div className="absolute right-0 top-full mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="p-3 border-b border-slate-700">

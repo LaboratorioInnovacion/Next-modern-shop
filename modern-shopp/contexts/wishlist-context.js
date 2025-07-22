@@ -47,20 +47,24 @@ export function WishlistProvider({ children }) {
 
   // Cargar wishlist del localStorage al iniciar
   useEffect(() => {
-    const savedWishlist = localStorage.getItem("modernshop-wishlist")
-    if (savedWishlist) {
-      try {
-        const parsedWishlist = JSON.parse(savedWishlist)
-        dispatch({ type: "LOAD_WISHLIST", payload: parsedWishlist })
-      } catch (error) {
-        console.error("Error loading wishlist:", error)
+    if (typeof window !== "undefined") {
+      const savedWishlist = localStorage.getItem("modernshop-wishlist")
+      if (savedWishlist) {
+        try {
+          const parsedWishlist = JSON.parse(savedWishlist)
+          dispatch({ type: "LOAD_WISHLIST", payload: parsedWishlist })
+        } catch (error) {
+          console.error("Error loading wishlist:", error)
+        }
       }
     }
   }, [])
 
   // Guardar wishlist en localStorage cuando cambie
   useEffect(() => {
-    localStorage.setItem("modernshop-wishlist", JSON.stringify(state.items))
+    if (typeof window !== "undefined") {
+      localStorage.setItem("modernshop-wishlist", JSON.stringify(state.items))
+    }
   }, [state.items])
 
   const addToWishlist = (product) => {

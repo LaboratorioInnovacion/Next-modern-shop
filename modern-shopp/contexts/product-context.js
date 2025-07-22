@@ -12,7 +12,7 @@ export function ProductProvider({ children }) {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [priceRange, setPriceRange] = useState([0, 1000])
 
-  // Datos de ejemplo - en producción vendrían de una API
+  // Datos de ejemplo
   const mockProducts = [
     {
       id: 1,
@@ -21,7 +21,7 @@ export function ProductProvider({ children }) {
       originalPrice: "$249.99",
       rating: 4.8,
       reviews: 128,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
       category: "electronics",
       badge: "Bestseller",
       discount: "20%",
@@ -35,7 +35,7 @@ export function ProductProvider({ children }) {
       originalPrice: "$399.99",
       rating: 4.9,
       reviews: 256,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
       category: "electronics",
       badge: "Nuevo",
       discount: "25%",
@@ -49,11 +49,53 @@ export function ProductProvider({ children }) {
       originalPrice: "$199.99",
       rating: 4.7,
       reviews: 189,
-      image: "/placeholder.svg?height=300&width=400",
+      image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&h=400&fit=crop",
       category: "electronics",
       badge: "Oferta",
       discount: "25%",
       description: "Altavoz Bluetooth portátil con sonido 360° y batería de larga duración",
+      inStock: true,
+    },
+    {
+      id: 4,
+      name: "Cámara Digital",
+      price: "$599.99",
+      originalPrice: "$799.99",
+      rating: 4.6,
+      reviews: 95,
+      image: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=400&fit=crop",
+      category: "electronics",
+      badge: "Bestseller",
+      discount: "25%",
+      description: "Cámara profesional con lente intercambiable y grabación 4K",
+      inStock: true,
+    },
+    {
+      id: 5,
+      name: "Laptop Gaming",
+      price: "$1299.99",
+      originalPrice: "$1599.99",
+      rating: 4.8,
+      reviews: 342,
+      image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=400&fit=crop",
+      category: "electronics",
+      badge: "Nuevo",
+      discount: "19%",
+      description: "Laptop gaming de alto rendimiento con RTX y procesador Intel i7",
+      inStock: true,
+    },
+    {
+      id: 6,
+      name: "Smartphone Pro",
+      price: "$899.99",
+      originalPrice: "$1099.99",
+      rating: 4.7,
+      reviews: 567,
+      image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=400&fit=crop",
+      category: "electronics",
+      badge: "Oferta",
+      discount: "18%",
+      description: "Smartphone con cámara triple, pantalla OLED y carga rápida",
       inStock: true,
     },
   ]
@@ -108,7 +150,6 @@ export function ProductProvider({ children }) {
   }
 
   const addToWishlist = (productId) => {
-    // Implementar lógica de wishlist
     console.log("Added to wishlist:", productId)
   }
 

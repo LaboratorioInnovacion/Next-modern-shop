@@ -14,7 +14,7 @@ export default function Hero() {
       subtitle: "Perfecto",
       description:
         "Explora nuestra colección seleccionada de productos premium con ofertas exclusivas. Calidad garantizada y envío gratuito en pedidos superiores a $50.",
-      image: "/placeholder.svg?height=700&width=1400&text=Slide+1",
+      image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1400&h=700&fit=crop",
       gradient: "from-blue-600/80 via-purple-600/60 to-pink-600/40",
     },
     {
@@ -22,7 +22,7 @@ export default function Hero() {
       subtitle: "Innovadora",
       description:
         "Los últimos gadgets y dispositivos tecnológicos que transformarán tu día a día. Innovación al alcance de tus manos.",
-      image: "/placeholder.svg?height=700&width=1400&text=Slide+2",
+      image: "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=1400&h=700&fit=crop",
       gradient: "from-cyan-600/80 via-blue-600/60 to-indigo-600/40",
     },
     {
@@ -30,7 +30,7 @@ export default function Hero() {
       subtitle: "Premium",
       description:
         "Productos cuidadosamente seleccionados de las mejores marcas mundiales. Experimenta la diferencia de la calidad superior.",
-      image: "/placeholder.svg?height=700&width=1400&text=Slide+3",
+      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=1400&h=700&fit=crop",
       gradient: "from-emerald-600/80 via-teal-600/60 to-cyan-600/40",
     },
   ]

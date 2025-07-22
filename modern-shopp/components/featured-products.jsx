@@ -3,7 +3,7 @@
 import { Star, Heart, Eye, ShoppingCart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ProductCardSkeleton } from "@/components/ui/skeleton"
+import { ProductCardSkeleton } from "@/components/ui/skeleton.jsx"
 import { useCart } from "@/contexts/cart-context"
 import { useProducts } from "@/contexts/product-context"
 import { useToast } from "@/contexts/toast-context"
