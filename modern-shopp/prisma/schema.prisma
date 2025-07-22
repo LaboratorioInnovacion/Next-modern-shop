@@ -57,6 +57,7 @@ model Product {
   specifications Json?
   features      String[]
   wishlistUsers User[]     @relation("Wishlist")
+  orderItems    OrderItem[] // Added relation to OrderItem
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -97,6 +98,8 @@ model OrderItem {
   productId String
   quantity  Int
   price     Float
+    // product   Product  @relation(fields: [productId], references: [id])
+
 }
 
 model Address {
