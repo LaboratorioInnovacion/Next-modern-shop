@@ -4,12 +4,140 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../lib/generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
 generator client {
   provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  avatar    String?
+  role      Role      @default(USER)
+  addresses Address[]
+  orders    Order[]
+  wishlist  Product[] @relation("Wishlist")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id            String     @id @default(cuid())
+  name          String
+  description   String
+  price         Float
+  originalPrice Float?
+  discount      Float?
+  image         String
+  images        String[]
+  category      Category   @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  brand         String
+  stock         Int
+  inStock       Boolean    @default(true)
+  featured      Boolean    @default(false)
+  rating        Float?
+  reviews       Int?
+  specifications Json?
+  features      String[]
+  wishlistUsers User[]     @relation("Wishlist")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  image       String
+  slug        String    @unique
+  products    Product[]
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  user            User         @relation(fields: [userId], references: [id])
+  userId          String
+  status          String
+  total           Float
+  subtotal        Float
+  tax             Float
+  shipping        Float
+  shippingAddress Json
+  billingAddress  Json
+  paymentMethod   String
+  paymentStatus   String
+  trackingNumber  String?
+  items           OrderItem[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int
+  price     Float
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  firstName String
+  lastName  String
+  address   String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  phone     String
+  isDefault Boolean  @default(false)
+}
+
+model Coupon {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  type        String
+  value       Float
+  description String?
+  minAmount   Float?
+  maxDiscount Float?
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime
+  usageLimit  Int
+  usedCount   Int      @default(0)
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  items     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
 }
