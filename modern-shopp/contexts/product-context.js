@@ -19,7 +19,7 @@ export function ProductProvider({ children }) {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        setProducts(data.products);
+        setProducts(Array.isArray(data.products) ? data.products : []);
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -31,7 +31,7 @@ export function ProductProvider({ children }) {
       try {
         const res = await fetch('/api/categories');
         const data = await res.json();
-        setCategories(data.categories);
+        setCategories(Array.isArray(data.categories) ? data.categories : []);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -53,6 +53,11 @@ export function ProductProvider({ children }) {
 
   const getProductById = (id) => products.find((product) => product.id === id);
 
+  // Métodos para exponer
+  const filterByCategory = (categoryId) => setSelectedCategory(categoryId);
+  const searchProducts = (term) => setSearchTerm(term);
+  const filterByPrice = (range) => setPriceRange(range);
+
   return (
     <ProductContext.Provider
       value={{
@@ -67,7 +72,10 @@ export function ProductProvider({ children }) {
         getProductById,
         setSearchTerm,
         setSelectedCategory,
-        setPriceRange
+        setPriceRange,
+        filterByCategory,
+        searchProducts,
+        filterByPrice
       }}
     >
       {children}
