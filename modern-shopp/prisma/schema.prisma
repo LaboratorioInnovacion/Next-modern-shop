@@ -32,7 +32,8 @@ model User {
   role      Role      @default(USER)
   addresses Address[]
   orders    Order[]
-  wishlist  Product[] @relation("Wishlist")
+  // wishlist  Product[] @relation("Wishlist")
+  wishlists Wishlist[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -56,8 +57,9 @@ model Product {
   reviews       Int?
   specifications Json?
   features      String[]
-  wishlistUsers User[]     @relation("Wishlist")
+  // wishlistUsers User[]     @relation("Wishlist")
   orderItems    OrderItem[] // Added relation to OrderItem
+  wishlists     Wishlist[]  // Opposite relation to Wishlist
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
@@ -131,16 +133,6 @@ model Coupon {
   usageLimit  Int
   usedCount   Int      @default(0)
 }
-// model Wishlist {
-//   id        String   @id @default(cuid())
-//   userId    String
-//   productId String
-//   user      User     @relation(fields: [userId], references: [id])
-//   product   Product  @relation(fields: [productId], references: [id])
-//   createdAt DateTime @default(now())
-
-//   @@unique([userId, productId])
-// }
 
 model Cart {
   id        String   @id @default(cuid())
@@ -149,6 +141,17 @@ model Cart {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
 
 enum Role {
   USER

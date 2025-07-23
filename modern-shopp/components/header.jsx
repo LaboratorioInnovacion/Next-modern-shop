@@ -87,11 +87,11 @@ export default function Header() {
                 className="hidden sm:flex hover:bg-slate-800 transition-all duration-300 relative w-8 h-8 sm:w-10 sm:h-10 items-center justify-center"
               >
                 <Heart className="w-4 h-4 sm:w-5 sm:h-5" />
-                {getWishlistCount() > 0 && (
+                {/* {getWishlistCount() > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
                     {getWishlistCount()}
                   </span>
-                )}
+                )} */}
               </Button>
 
               {/* Carrito */}
