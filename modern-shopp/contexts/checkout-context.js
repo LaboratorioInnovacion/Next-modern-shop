@@ -107,35 +107,67 @@ export function CheckoutProvider({ children }) {
     dispatch({ type: "RESET_CHECKOUT" })
   }
 
-  const processPayment = async (paymentData) => {
-    setLoading(true)
-    clearError()
+  // const processPayment = async (paymentData) => {
+  //   setLoading(true)
+  //   clearError()
 
-    try {
-      // Simular procesamiento de pago
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+  //   try {
+  //     // Simular procesamiento de pago
+  //     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      // Simular éxito/fallo aleatorio para demo
-      if (Math.random() > 0.1) {
-        // 90% de éxito
-        return {
-          success: true,
-          transactionId: `TXN_${Date.now()}`,
-          message: "Pago procesado exitosamente",
-        }
-      } else {
-        throw new Error("Error al procesar el pago. Intenta nuevamente.")
-      }
-    } catch (error) {
-      setError(error.message)
+  //     // Simular éxito/fallo aleatorio para demo
+  //     if (Math.random() > 0.1) {
+  //       // 90% de éxito
+  //       return {
+  //         success: true,
+  //         transactionId: `TXN_${Date.now()}`,
+  //         message: "Pago procesado exitosamente",
+  //       }
+  //     } else {
+  //       throw new Error("Error al procesar el pago. Intenta nuevamente.")
+  //     }
+  //   } catch (error) {
+  //     setError(error.message)
+  //     return {
+  //       success: false,
+  //       error: error.message,
+  //     }
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+const processPayment = async (paymentData) => {
+  setLoading(true)
+  clearError()
+
+  try {
+    const res = await fetch("/api/checkout/pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentData }),
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
       return {
-        success: false,
-        error: error.message,
-      }
-    } finally {
-      setLoading(false)
+        success: true,
+        transactionId: result.transactionId,
+        message: result.message,
+      };
+    } else {
+      throw new Error(result.error || "Error al procesar el pago.");
     }
+  } catch (error) {
+    setError(error.message)
+    return {
+      success: false,
+      error: error.message,
+    };
+  } finally {
+    setLoading(false)
   }
+};
 
   const value = {
     currentStep: state.currentStep,
