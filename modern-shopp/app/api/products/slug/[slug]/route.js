@@ -1,5 +1,5 @@
 // app/api/products/slug/[slug]/route.js
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/db';
 
 export async function GET(req, { params }) {
   const { slug } = params;

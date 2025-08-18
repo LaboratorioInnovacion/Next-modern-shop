@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 // import { PrismaAdapter } from "@auth/prisma-adapter"
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db"
+
 import bcrypt from "bcryptjs"
 
 const handler = NextAuth({
@@ -21,7 +22,7 @@ const handler = NextAuth({
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
-        const user = await db.user.findUnique({
+        const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         })
 

@@ -1,73 +1,75 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
+import { useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
-  const { login, register, loading, error, clearError } = useAuth()
-  const [mode, setMode] = useState(defaultMode)
-  const [showPassword, setShowPassword] = useState(false)
+  const { login, register, loading, error, clearError } = useAuth();
+  const [mode, setMode] = useState(defaultMode);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-  })
+  });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-    clearError()
-  }
+    }));
+    clearError();
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (mode === "login") {
-      const result = await login(formData.email, formData.password)
+      const result = await login(formData.email, formData.password);
       if (result.success) {
-        onClose()
-        setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+        onClose();
+        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
       }
     } else {
       if (formData.password !== formData.confirmPassword) {
-        return
+        return;
       }
 
       const result = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
-      })
+      });
 
       if (result.success) {
-        onClose()
-        setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+        onClose();
+        setFormData({ name: "", email: "", password: "", confirmPassword: "" });
       }
     }
-  }
+  };
 
   const switchMode = () => {
-    setMode(mode === "login" ? "register" : "login")
-    setFormData({ name: "", email: "", password: "", confirmPassword: "" })
-    clearError()
-  }
+    setMode(mode === "login" ? "register" : "login");
+    setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+    clearError();
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-slate-800 border-slate-700">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>{mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}</CardTitle>
+            <CardTitle>
+              {mode === "login" ? "Iniciar Sesión" : "Crear Cuenta"}
+            </CardTitle>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="w-4 h-4" />
             </Button>
@@ -77,7 +79,9 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "register" && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Nombre Completo</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Nombre Completo
+                </label>
                 <div className="relative">
                   <Input
                     name="name"
@@ -93,7 +97,9 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Email
+              </label>
               <div className="relative">
                 <Input
                   name="email"
@@ -109,7 +115,9 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Contraseña</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Contraseña
+              </label>
               <div className="relative">
                 <Input
                   name="password"
@@ -128,14 +136,20 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
                   className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
             </div>
 
             {mode === "register" && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Confirmar Contraseña</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Confirmar Contraseña
+                </label>
                 <div className="relative">
                   <Input
                     name="confirmPassword"
@@ -148,9 +162,12 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
                   />
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
-                {formData.password !== formData.confirmPassword && formData.confirmPassword && (
-                  <p className="text-red-400 text-sm mt-1">Las contraseñas no coinciden</p>
-                )}
+                {formData.password !== formData.confirmPassword &&
+                  formData.confirmPassword && (
+                    <p className="text-red-400 text-sm mt-1">
+                      Las contraseñas no coinciden
+                    </p>
+                  )}
               </div>
             )}
 
@@ -163,7 +180,11 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              disabled={loading || (mode === "register" && formData.password !== formData.confirmPassword)}
+              disabled={
+                loading ||
+                (mode === "register" &&
+                  formData.password !== formData.confirmPassword)
+              }
             >
               {loading ? (
                 <>
@@ -176,11 +197,15 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
                 "Crear Cuenta"
               )}
             </Button>
-
+            <p>nuevo@example.com , 123456 </p>
             <div className="text-center">
               <p className="text-gray-400 text-sm">
                 {mode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
-                <button type="button" onClick={switchMode} className="text-blue-400 hover:text-blue-300 font-medium">
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="text-blue-400 hover:text-blue-300 font-medium"
+                >
                   {mode === "login" ? "Regístrate" : "Inicia sesión"}
                 </button>
               </p>
@@ -189,5 +214,5 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

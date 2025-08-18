@@ -1,6 +1,6 @@
 // ✅ API: /api/auth/login/route.js
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 import { signJWT } from "@/lib/jwt"
 

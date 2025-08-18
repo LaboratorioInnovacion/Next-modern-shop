@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useProducts } from "@/contexts/product-context"
 import { useCart } from "@/contexts/cart-context"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,10 @@ export default function ProductosPage() {
 
   const filteredProducts = getFilteredProducts()
 
+  useEffect(() => {
+    console.log(products)
+  }, [products])
+
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-low":
@@ -52,6 +56,7 @@ export default function ProductosPage() {
       </div>
     )
   }
+
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">

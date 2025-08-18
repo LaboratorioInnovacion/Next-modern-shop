@@ -1,0 +1,59 @@
+### Archivo para pruebas HTTP de tus endpoints API
+# Cambia la URL base si usas otro puerto o dominio
+@baseUrl = http://localhost:3000/api
+
+### Auth
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "nuevo@example.com",
+  "password": "123456"
+}
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "nuevo@example.com",
+  "password": "123456",
+  "name": "Nuevo Usuario"
+}
+
+### NextAuth Session
+GET {{baseUrl}}/auth/session
+
+### Productos
+GET {{baseUrl}}/products
+
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "name": "Producto de prueba",
+  "description": "Descripción",
+  "price": 100,
+  "image": "url.jpg",
+  "images": ["url.jpg"],
+  "brand": "Marca",
+  "stock": 10,
+  "features": ["feature1", "feature2"]
+}
+
+GET {{baseUrl}}/products/slug/test-slug
+
+GET {{baseUrl}}/products/123
+
+### Categorías
+GET {{baseUrl}}/categories
+
+### Carrito
+GET {{baseUrl}}/cart
+
+### Checkout
+GET {{baseUrl}}/checkout
+
+### Wishlist
+GET {{baseUrl}}/wishlist
+

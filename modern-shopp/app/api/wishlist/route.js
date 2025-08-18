@@ -1,22 +1,19 @@
-// app/api/wishlist/route.js
-import { auth } from "@/auth" // NextAuth v5
-import { prisma } from "@/lib/prisma"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 import { NextResponse } from "next/server"
 
 export async function GET(req) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-
   const userId = session.user.id
-
   try {
     const wishlist = await prisma.wishlist.findMany({
       where: { userId },
       include: { product: true },
     })
-
     return NextResponse.json(wishlist.map(item => item.product), { status: 200 })
   } catch (error) {
     return NextResponse.json({ error: "Error fetching wishlist" }, { status: 500 })
@@ -24,18 +21,15 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-
   const userId = session.user.id
   const { productId } = await req.json()
-
   if (!productId) {
     return NextResponse.json({ error: "Product ID required" }, { status: 400 })
   }
-
   try {
     await prisma.wishlist.create({
       data: {
@@ -43,30 +37,25 @@ export async function POST(req) {
         productId,
       },
     })
-
     return NextResponse.json({ message: "Product added to wishlist" }, { status: 201 })
   } catch (error) {
     if (error.code === "P2002") {
       return NextResponse.json({ message: "Already in wishlist" }, { status: 200 })
     }
-
     return NextResponse.json({ error: "Error adding to wishlist" }, { status: 500 })
   }
 }
 
 export async function DELETE(req) {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-
   const userId = session.user.id
   const { productId } = await req.json()
-
   if (!productId) {
     return NextResponse.json({ error: "Product ID required" }, { status: 400 })
   }
-
   try {
     await prisma.wishlist.delete({
       where: {
@@ -76,7 +65,6 @@ export async function DELETE(req) {
         },
       },
     })
-
     return NextResponse.json({ message: "Product removed from wishlist" }, { status: 200 })
   } catch (error) {
     return NextResponse.json({ error: "Error removing from wishlist" }, { status: 500 })
