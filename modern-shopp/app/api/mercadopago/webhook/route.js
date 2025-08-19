@@ -1,26 +1,36 @@
+
 // Endpoint para recibir notificaciones (webhooks) de MercadoPago
+// MercadoPago envía notificaciones a este endpoint cuando cambia el estado de un pago u otro evento.
+// Sirve para actualizar el estado de la orden en tu base de datos aunque el usuario cierre la ventana.
 // Documentación oficial: https://www.mercadopago.com.ar/developers/es/docs/checkout-api/webhooks
 
+
 import { NextResponse } from 'next/server';
+
 
 // POST: MercadoPago envía notificaciones de eventos de pago
 export async function POST(req) {
   try {
-    // MercadoPago envía los datos en req.body (puede ser JSON o x-www-form-urlencoded)
+    // 1. MercadoPago envía los datos en el body (puede ser JSON o x-www-form-urlencoded)
+    //    Aquí intentamos parsear como JSON, si falla, body será null
     const body = await req.json().catch(() => null);
-    // También puede enviar los datos por query params (topic, id, etc.)
-    // const { searchParams } = new URL(req.url);
-    // const topic = searchParams.get('topic');
-    // const id = searchParams.get('id');
 
-    // Puedes loguear todo para depuración
+    // 2. También puede enviar datos por query params (topic, id, etc.)
+    //    Ejemplo:
+    //    const { searchParams } = new URL(req.url);
+    //    const topic = searchParams.get('topic');
+    //    const id = searchParams.get('id');
+
+    // 3. Log para depuración: muestra todo lo recibido
     console.log('Webhook MercadoPago recibido:', body);
 
-    // Si es un pago, consulta el estado del pago a la API de MercadoPago
+    // 4. Si la notificación es de un pago, consulta el estado del pago a la API de MercadoPago
+    //    Esto es importante porque el webhook puede llegar antes que el usuario vuelva a tu web
     if (body && (body.type === 'payment' || body.action === 'payment.created' || body.action === 'payment.updated')) {
+      // El ID del pago puede venir en diferentes formatos
       const paymentId = body.data && body.data.id ? body.data.id : body['data.id'];
       if (paymentId) {
-        // Consulta el pago a la API de MercadoPago
+        // Consulta el pago a la API de MercadoPago para obtener el estado actualizado
         const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
           headers: {
             'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
@@ -30,6 +40,7 @@ export async function POST(req) {
         console.log('Detalle del pago consultado:', payment);
 
         // Aquí deberías actualizar la orden en tu base de datos según el payment.external_reference o payment.status
+        // Por ejemplo, podrías marcar la orden como pagada, rechazada, pendiente, etc.
         // Ejemplo (pseudocódigo):
         // await prisma.order.update({
         //   where: { externalId: payment.external_reference },
@@ -38,9 +49,10 @@ export async function POST(req) {
       }
     }
 
-    // Siempre responde 200 para que MercadoPago no reintente
+    // 5. Siempre responde 200 para que MercadoPago no reintente el webhook
     return NextResponse.json({ received: true });
   } catch (error) {
+    // 6. Si hay error, lo loguea y responde 500
     console.error('Error en webhook MercadoPago:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

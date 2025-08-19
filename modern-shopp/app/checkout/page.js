@@ -211,14 +211,9 @@ export default function CheckoutPage() {
               }))
             })
           });
-          if (orderRes.ok) {
-            // Redirigir a MercadoPago
-            window.location.href = data.init_point;
-            return;
-          } else {
-            alert("Error al crear la orden");
-            return;
-          }
+          // Redirigir a MercadoPago aunque la orden falle
+          window.location.href = data.init_point;
+          return;
         } else {
           alert("Error al iniciar pago con MercadoPago");
         }
