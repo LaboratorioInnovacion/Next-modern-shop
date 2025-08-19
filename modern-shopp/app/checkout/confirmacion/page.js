@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,13 +11,45 @@ export default function ConfirmacionPage() {
   const searchParams = useSearchParams()
   const transactionId = searchParams.get("id")
   const isTransferencia = transactionId === "transferencia" || transactionId?.startsWith("transferencia-");
-  const [orderDetails] = useState({
-    id: transactionId || "TXN_" + Date.now(),
-    date: new Date().toLocaleDateString("es-ES"),
-    estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString("es-ES"),
-    trackingNumber: "ES" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-  })
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!transactionId || isTransferencia) {
+        setOrderDetails({
+          id: transactionId || "TXN_" + Date.now(),
+          date: new Date().toLocaleDateString("es-ES"),
+          estimatedDelivery: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString("es-ES"),
+          trackingNumber: "ES" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          status: isTransferencia ? "pendiente" : "-"
+        });
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/orders?id=${transactionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setOrderDetails(data);
+        } else {
+          setError("No se pudo cargar la orden");
+        }
+      } catch (e) {
+        setError("No se pudo cargar la orden");
+      }
+      setLoading(false);
+    };
+    fetchOrder();
+  }, [transactionId, isTransferencia]);
+
+  if (loading) {
+    return <div className="text-center text-gray-400 py-12">Cargando detalles de la orden...</div>;
+  }
+  if (error) {
+    return <div className="text-center text-red-400 py-12">{error}</div>;
+  }
   return (
   <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
@@ -70,20 +102,26 @@ export default function ConfirmacionPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-400 text-sm">Número de Pedido</p>
-                <p className="text-white font-semibold">{orderDetails.id}</p>
+                <p className="text-white font-semibold">{orderDetails?.id}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Fecha del Pedido</p>
-                <p className="text-white font-semibold">{orderDetails.date}</p>
+                <p className="text-white font-semibold">{orderDetails?.createdAt ? new Date(orderDetails.createdAt).toLocaleDateString("es-ES") : orderDetails?.date}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-sm">Estado</p>
+                <p className="text-white font-semibold">{orderDetails?.status || "-"}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Entrega Estimada</p>
-                <p className="text-white font-semibold">{orderDetails.estimatedDelivery}</p>
+                <p className="text-white font-semibold">{orderDetails?.estimatedDelivery || "-"}</p>
               </div>
-              <div>
-                <p className="text-gray-400 text-sm">Número de Seguimiento</p>
-                <p className="text-white font-semibold">{orderDetails.trackingNumber}</p>
-              </div>
+              {orderDetails?.trackingNumber && (
+                <div>
+                  <p className="text-gray-400 text-sm">Número de Seguimiento</p>
+                  <p className="text-white font-semibold">{orderDetails.trackingNumber}</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

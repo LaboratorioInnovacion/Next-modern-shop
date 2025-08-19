@@ -167,11 +167,58 @@ export default function CheckoutPage() {
           })
         });
         const data = await res.json();
-        if (data.init_point) {
-          // Antes de redirigir, crea la orden en la base de datos con status 'pendiente_pago' o similar si lo deseas
-          // Aquí podrías crear la orden y guardar el external_reference de MercadoPago
-          window.location.href = data.init_point;
-          return;
+        if (data.init_point && data.preference_id) {
+          // Crear la orden en la base de datos con el external_reference (preference_id)
+          const orderRes = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId: user?.id || null,
+              status: "pendiente_pago",
+              total,
+              subtotal,
+              tax,
+              shipping,
+              shippingAddress: {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zipCode: formData.zipCode,
+                country: formData.country
+              },
+              billingAddress: {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                state: formData.state,
+                zipCode: formData.zipCode,
+                country: formData.country
+              },
+              paymentMethod,
+              paymentStatus: "pendiente",
+              externalReference: data.preference_id,
+              items: items.map(item => ({
+                productId: item.id,
+                quantity: item.quantity,
+                price: item.price
+              }))
+            })
+          });
+          if (orderRes.ok) {
+            // Redirigir a MercadoPago
+            window.location.href = data.init_point;
+            return;
+          } else {
+            alert("Error al crear la orden");
+            return;
+          }
         } else {
           alert("Error al iniciar pago con MercadoPago");
         }
