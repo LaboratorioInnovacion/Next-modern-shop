@@ -149,6 +149,36 @@ export default function CheckoutPage() {
   }
 
   const handlePayment = async () => {
+    if (paymentMethod === "mercadopago") {
+      // Redirigir a MercadoPago
+      try {
+        const res = await fetch("/api/mercadopago", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: items.map(item => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            payer: {
+              email: formData.email || "usuario@email.com"
+            }
+          })
+        });
+        const data = await res.json();
+        if (data.init_point) {
+          window.location.href = data.init_point;
+          return;
+        } else {
+          alert("Error al iniciar pago con MercadoPago");
+        }
+      } catch (e) {
+        alert("Error al conectar con MercadoPago");
+      }
+      return;
+    }
+    // Flujo normal para otros métodos
     const paymentData = {
       amount: total,
       currency: "EUR",
@@ -157,9 +187,7 @@ export default function CheckoutPage() {
       paymentMethod,
       billingInfo,
     }
-
     const result = await processPayment(paymentData)
-
     if (result.success) {
       // Limpiar carrito y redirigir a confirmación
       clearCart()
@@ -379,6 +407,7 @@ export default function CheckoutPage() {
               <CardContent className="space-y-6">
                 {/* Opciones de Pago */}
                 <div className="space-y-4">
+                  {/* Tarjeta */}
                   <div
                     className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       paymentMethod === "card"
@@ -398,6 +427,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
+                  {/* PayPal */}
                   <div
                     className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${
                       paymentMethod === "paypal"
@@ -414,6 +444,26 @@ export default function CheckoutPage() {
                       ></div>
                       <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                       <span className="font-medium text-sm sm:text-base">PayPal</span>
+                    </div>
+                  </div>
+
+                  {/* MercadoPago */}
+                  <div
+                    className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === "mercadopago"
+                        ? "border-blue-500 bg-blue-500/10"
+                        : "border-slate-600 hover:border-slate-500"
+                    }`}
+                    onClick={() => setPaymentMethod("mercadopago")}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                          paymentMethod === "mercadopago" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                        }`}
+                      ></div>
+                      <img src="/mercadopago.svg" alt="MercadoPago" className="w-6 h-6 mr-2" />
+                      <span className="font-medium text-sm sm:text-base">MercadoPago</span>
                     </div>
                   </div>
                 </div>
@@ -531,9 +581,11 @@ export default function CheckoutPage() {
                       <p className="text-white text-sm sm:text-base">
                         Tarjeta terminada en ****{formData.cardNumber.slice(-4)}
                       </p>
-                    ) : (
+                    ) : paymentMethod === "paypal" ? (
                       <p className="text-white text-sm sm:text-base">PayPal</p>
-                    )}
+                    ) : paymentMethod === "mercadopago" ? (
+                      <p className="text-white text-sm sm:text-base">MercadoPago</p>
+                    ) : null}
                   </div>
                 </div>
 

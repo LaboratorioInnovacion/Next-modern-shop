@@ -7,15 +7,23 @@ import { Input } from "@/components/ui/input"
 import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function CarritoPage() {
   const router = useRouter()
   const { items, removeFromCart, updateQuantity, clearCart, getTotalPrice, getTotalItems } = useCart()
 
+  useEffect(() => {
+    console.log(items)
+  }, [items])
+
   const subtotal = getTotalPrice()
+  // const shipping = subtotal > 50 ? 0 : 9.99
   const shipping = subtotal > 50 ? 0 : 9.99
-  const tax = subtotal * 0.08
-  const total = subtotal + shipping + tax
+  // const tax = subtotal * 0.08
+  const tax = subtotal
+  // const total = subtotal + shipping + tax
+  const total = subtotal
 
   if (items.length === 0) {
     return (
@@ -153,10 +161,10 @@ export default function CarritoPage() {
                       {shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm sm:text-base">
+                  {/* <div className="flex justify-between text-sm sm:text-base">
                     <span className="text-gray-400">Impuestos</span>
                     <span className="text-white font-semibold">${tax.toFixed(2)}</span>
-                  </div>
+                  </div> */}
                   <div className="border-t border-slate-600 pt-3 sm:pt-4">
                     <div className="flex justify-between">
                       <span className="text-lg sm:text-xl font-bold text-white">Total</span>
