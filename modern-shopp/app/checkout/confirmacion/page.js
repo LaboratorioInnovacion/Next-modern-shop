@@ -10,6 +10,7 @@ import Link from "next/link"
 export default function ConfirmacionPage() {
   const searchParams = useSearchParams()
   const transactionId = searchParams.get("id")
+  const isTransferencia = transactionId === "transferencia" || transactionId?.startsWith("transferencia-");
   const [orderDetails] = useState({
     id: transactionId || "TXN_" + Date.now(),
     date: new Date().toLocaleDateString("es-ES"),
@@ -18,7 +19,7 @@ export default function ConfirmacionPage() {
   })
 
   return (
-    <div className="container mx-auto px-4 py-8">
+  <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
         {/* Header de Confirmación */}
         <div className="text-center mb-8">
@@ -30,6 +31,32 @@ export default function ConfirmacionPage() {
             Gracias por tu compra. Hemos recibido tu pedido y lo estamos procesando.
           </p>
         </div>
+
+        {/* Instrucciones de Transferencia Bancaria */}
+        {isTransferencia && (
+          <Card className="bg-yellow-900/40 border-yellow-700 mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Package className="w-5 h-5 mr-2" />
+                Pago por Transferencia Bancaria
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-yellow-200 text-sm">
+                Por favor, realiza una transferencia bancaria a la siguiente cuenta:
+              </p>
+              <div className="bg-yellow-800/60 rounded p-3">
+                <p className="text-yellow-100 text-sm font-semibold">Banco: Banco Ejemplo</p>
+                <p className="text-yellow-100 text-sm font-semibold">IBAN: ES12 3456 7890 1234 5678 9012</p>
+                <p className="text-yellow-100 text-sm font-semibold">Titular: Tienda Online S.L.</p>
+                <p className="text-yellow-100 text-sm font-semibold">Concepto: Tu nombre y número de pedido</p>
+              </div>
+              <p className="text-yellow-200 text-xs">
+                Una vez recibamos el pago, procesaremos y enviaremos tu pedido. Si tienes dudas, contáctanos.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Detalles del Pedido */}
         <Card className="bg-slate-800 border-slate-700 mb-8">

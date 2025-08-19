@@ -178,6 +178,12 @@ export default function CheckoutPage() {
       }
       return;
     }
+        if (paymentMethod === "transferencia") {
+          clearCart();
+          resetCheckout();
+          router.push(`/checkout/confirmacion?id=transferencia`);
+          return;
+        }
     // Flujo normal para otros métodos
     const paymentData = {
       amount: total,
@@ -466,6 +472,26 @@ export default function CheckoutPage() {
                       <span className="font-medium text-sm sm:text-base">MercadoPago</span>
                     </div>
                   </div>
+
+                  {/* Transferencia Bancaria */}
+                  <div
+                    className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      paymentMethod === "transferencia"
+                        ? "border-blue-500 bg-blue-500/10"
+                        : "border-slate-600 hover:border-slate-500"
+                    }`}
+                    onClick={() => setPaymentMethod("transferencia")}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                          paymentMethod === "transferencia" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                        }`}
+                      ></div>
+                      <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                      <span className="font-medium text-sm sm:text-base">Transferencia Bancaria</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Formulario de Tarjeta */}
@@ -585,9 +611,26 @@ export default function CheckoutPage() {
                       <p className="text-white text-sm sm:text-base">PayPal</p>
                     ) : paymentMethod === "mercadopago" ? (
                       <p className="text-white text-sm sm:text-base">MercadoPago</p>
+                    ) : paymentMethod === "transferencia" ? (
+                      <p className="text-white text-sm sm:text-base">Transferencia Bancaria</p>
                     ) : null}
                   </div>
                 </div>
+
+                {/* Instrucciones de Transferencia Bancaria en confirmación */}
+                {paymentMethod === "transferencia" && (
+                  <div className="bg-yellow-900/40 border border-yellow-700 rounded-lg p-4">
+                    <h4 className="text-yellow-200 font-semibold mb-2 flex items-center"><Package className="w-4 h-4 mr-2" />Datos para Transferencia Bancaria</h4>
+                    <p className="text-yellow-200 text-sm mb-2">Por favor, realiza una transferencia bancaria a la siguiente cuenta:</p>
+                    <div className="bg-yellow-800/60 rounded p-3 mb-2">
+                      <p className="text-yellow-100 text-sm font-semibold">Banco: Banco Ejemplo</p>
+                      <p className="text-yellow-100 text-sm font-semibold">IBAN: ES12 3456 7890 1234 5678 9012</p>
+                      <p className="text-yellow-100 text-sm font-semibold">Titular: Tienda Online S.L.</p>
+                      <p className="text-yellow-100 text-sm font-semibold">Concepto: Tu nombre y número de pedido</p>
+                    </div>
+                    <p className="text-yellow-200 text-xs">Una vez recibamos el pago, procesaremos y enviaremos tu pedido. Si tienes dudas, contáctanos.</p>
+                  </div>
+                )}
 
                 {error && (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 sm:p-4">
