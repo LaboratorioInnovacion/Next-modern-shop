@@ -2,13 +2,35 @@ import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
-  const orders = await prisma.order.findMany({ include: { items: true, user: true } });
+  const orders = await prisma.order.findMany({
+    include: {
+      items: {
+        include: {
+          product: true
+        }
+      },
+      user: true
+    }
+  });
   return NextResponse.json(orders);
 }
 
 export async function POST(req) {
   const data = await req.json();
-  const order = await prisma.order.create({ data });
+  // Adaptar los items para la relación anidada de Prisma
+  const { items, ...orderData } = data;
+  const order = await prisma.order.create({
+    data: {
+      ...orderData,
+      items: {
+        create: items.map(item => ({
+          productId: item.productId || item.id,
+          quantity: item.quantity,
+          price: item.price
+        }))
+      }
+    }
+  });
   return NextResponse.json(order, { status: 201 });
 }
 
