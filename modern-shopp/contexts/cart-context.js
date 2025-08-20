@@ -50,35 +50,32 @@ export function CartProvider({ children }) {
   useEffect(() => {
     const loadCart = async () => {
       try {
-        let merged = [];
+        let loaded = [];
+        // Primero intenta cargar desde la API (si está autenticado)
+        const res = await fetch('/api/cart');
+        if (res.ok) {
+          const items = await res.json();
+          if (Array.isArray(items) && items.length > 0) {
+            const productsRes = await fetch('/api/products');
+            const products = await productsRes.json();
+            loaded = items.map(item => {
+              const prod = products.find(p => p.id === item.productId);
+              return prod ? { ...prod, quantity: item.quantity } : null;
+            }).filter(Boolean);
+            dispatch({ type: 'LOAD_CART', payload: loaded });
+            return;
+          }
+        }
+        // Si no hay datos de la API, usa localStorage
         if (typeof window !== 'undefined') {
           const savedCart = localStorage.getItem('modernshop-cart');
           if (savedCart) {
             try {
-              merged = JSON.parse(savedCart);
-              dispatch({ type: 'LOAD_CART', payload: merged });
+              loaded = JSON.parse(savedCart);
+              dispatch({ type: 'LOAD_CART', payload: loaded });
             } catch (e) { /* ignore */ }
           }
         }
-        // Sincroniza con la API solo si responde 200
-        const res = await fetch('/api/cart');
-        if (res.status === 401) {
-          // No autenticado, NO sobrescribas el carrito local
-          return;
-        }
-        if (!res.ok) return;
-        const items = await res.json();
-        if (!Array.isArray(items) || items.length === 0) {
-          // Si la API responde vacío, pero hay carrito local, no sobrescribas
-          return;
-        }
-        const productsRes = await fetch('/api/products');
-        const products = await productsRes.json();
-        merged = items.map(item => {
-          const prod = products.find(p => p.id === item.productId);
-          return prod ? { ...prod, quantity: item.quantity } : null;
-        }).filter(Boolean);
-        dispatch({ type: 'LOAD_CART', payload: merged });
       } catch (error) {
         console.error('Error loading cart:', error);
       }
