@@ -10,6 +10,19 @@ const cartReducer = (state, action) => {
     case 'LOAD_CART':
       return { ...state, items: action.payload || [] };
     case 'ADD_TO_CART':
+      // Si el producto ya existe, actualiza la cantidad
+      const existing = state.items.find(item => item.id === action.payload.id);
+      if (existing) {
+        return {
+          ...state,
+          items: state.items.map(item =>
+            item.id === action.payload.id
+              ? { ...item, quantity: item.quantity + action.payload.quantity }
+              : item
+          )
+        };
+      }
+      // Si no existe, lo agrega normalmente
       return { ...state, items: [...state.items, action.payload] };
     case 'REMOVE_FROM_CART':
       return { ...state, items: state.items.filter(item => item.id !== action.payload) };
@@ -50,19 +63,22 @@ export function CartProvider({ children }) {
   useEffect(() => {
     const loadCart = async () => {
       try {
-        let loaded = [];
-        // Primero intenta cargar desde la API (si está autenticado)
+        // Intenta cargar desde la API (si está autenticado)
         const res = await fetch('/api/cart');
         if (res.ok) {
           const items = await res.json();
           if (Array.isArray(items) && items.length > 0) {
             const productsRes = await fetch('/api/products');
             const products = await productsRes.json();
-            loaded = items.map(item => {
+            const loaded = items.map(item => {
               const prod = products.find(p => p.id === item.productId);
               return prod ? { ...prod, quantity: item.quantity } : null;
             }).filter(Boolean);
+            // Sobrescribe el carrito local con el de la API
             dispatch({ type: 'LOAD_CART', payload: loaded });
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('modernshop-cart', JSON.stringify(loaded));
+            }
             return;
           }
         }
@@ -71,7 +87,7 @@ export function CartProvider({ children }) {
           const savedCart = localStorage.getItem('modernshop-cart');
           if (savedCart) {
             try {
-              loaded = JSON.parse(savedCart);
+              const loaded = JSON.parse(savedCart);
               dispatch({ type: 'LOAD_CART', payload: loaded });
             } catch (e) { /* ignore */ }
           }
@@ -109,7 +125,7 @@ export function CartProvider({ children }) {
     try {
       const res = await fetch('/api/cart', {
         method: 'DELETE',
-        body: JSON.stringify({ id: cartItemId })
+        body: JSON.stringify({ productId: cartItemId })
       });
 
       if (res.ok) {
@@ -120,7 +136,17 @@ export function CartProvider({ children }) {
     }
   };
 
-  const clearCart = () => dispatch({ type: 'CLEAR_CART' });
+  const clearCart = async () => {
+    try {
+      await fetch('/api/cart', {
+        method: 'DELETE',
+        body: JSON.stringify({ clearAll: true }) // puedes adaptar el body según tu API
+      });
+    } catch (err) {
+      console.error('Error clearing cart in backend:', err);
+    }
+    dispatch({ type: 'CLEAR_CART' });
+  };
 
   const getTotalItems = () => state.items.reduce((sum, item) => sum + item.quantity, 0);
   const getTotalPrice = () => calculateCartTotals(state.items).total;

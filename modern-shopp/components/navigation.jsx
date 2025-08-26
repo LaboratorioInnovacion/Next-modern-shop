@@ -10,8 +10,8 @@ export default function Navigation() {
     { href: "/", label: "Inicio" },
     { href: "/productos", label: "Productos" },
     { href: "/categorias", label: "Categorías" },
-    { href: "/carrito", label: "Carrito" },
-    { href: "/perfil", label: "Mi Perfil" },
+    // { href: "/carrito", label: "Carrito" },
+    // { href: "/perfil", label: "Mi Perfil" },
   ]
 
   return (

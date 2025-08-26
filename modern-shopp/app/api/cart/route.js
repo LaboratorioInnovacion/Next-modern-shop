@@ -60,7 +60,7 @@ export async function DELETE(req) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { productId } = await req.json();
+  const body = await req.json();
   let cart = await prisma.cart.findUnique({ where: { userId: session.user.id } });
   if (!cart) return NextResponse.json({ error: 'No cart found' }, { status: 404 });
   let items = [];
@@ -69,7 +69,11 @@ export async function DELETE(req) {
   } catch {
     items = [];
   }
-  items = items.filter(item => item.productId !== productId);
+  if (body.clearAll) {
+    items = [];
+  } else if (body.productId) {
+    items = items.filter(item => item.productId !== body.productId);
+  }
   await prisma.cart.update({
     where: { userId: session.user.id },
     data: { items: JSON.stringify(items) }

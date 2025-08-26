@@ -95,19 +95,20 @@ export default function Header() {
               </Button>
 
               {/* Carrito */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-slate-800 transition-all duration-300 relative w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center"
-                onClick={toggleCart}
-              >
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
-                {getTotalItems() > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
-                    {getTotalItems()}
-                  </span>
-                )}
-              </Button>
+              <Link href="/carrito">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-slate-800 transition-all duration-300 relative w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center"
+                >
+                  <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                  {getTotalItems() > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px] sm:text-xs">
+                      {getTotalItems()}
+                    </span>
+                  )}
+                </Button>
+              </Link>
 
               {/* Usuario desktop */}
               {isAuthenticated ? (
