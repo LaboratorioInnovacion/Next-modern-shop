@@ -51,7 +51,14 @@ export function ProductProvider({ children }) {
 
   const getFeaturedProducts = () => products.filter((product) => product.featured);
 
-  const getProductById = (id) => products.find((product) => product.id === id);
+  // Adaptación: permite buscar por id numérico o string
+  const getProductById = (id) => {
+    if (!id) return undefined;
+    // Normaliza el id a string y número para comparar ambos
+    return products.find(
+      (product) => product.id === id || product.id === String(id) || product.id === Number(id)
+    );
+  };
 
   // Métodos para exponer
   const filterByCategory = (categoryId) => setSelectedCategory(categoryId);
