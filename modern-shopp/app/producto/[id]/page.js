@@ -9,6 +9,23 @@ import { Star, Heart, Share2, ShoppingCart, Truck, Shield, Plus, Minus, Check, A
 import Link from "next/link"
 
 export default function ProductoDetalle({ params }) {
+  // Estado para modo cine y zoom
+  const [showCine, setShowCine] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const handleOpenCine = () => {
+    setShowCine(true);
+    setZoom(1);
+  };
+  const handleCloseCine = () => {
+    setShowCine(false);
+    setZoom(1);
+  };
+  const handleWheel = (e) => {
+    e.preventDefault();
+    let newZoom = zoom + (e.deltaY < 0 ? 0.2 : -0.2);
+    newZoom = Math.max(1, Math.min(newZoom, 3));
+    setZoom(newZoom);
+  };
   const { getProductById } = useProducts()
   const { addToCart } = useCart()
   const [quantity, setQuantity] = useState(1)
@@ -110,7 +127,8 @@ export default function ProductoDetalle({ params }) {
             <img
               src={productImages[activeImage] || "/placeholder.svg"}
               alt={product.name}
-              className="w-full h-full object-contain p-2 sm:p-4"
+              className="w-full h-full object-contain p-2 sm:p-4 cursor-zoom-in"
+              onClick={handleOpenCine}
             />
             {product.badge && (
               <div className="absolute top-2 sm:top-4 left-2 sm:left-4">
@@ -137,6 +155,50 @@ export default function ProductoDetalle({ params }) {
           </div>
 
           <div className="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          {/* Modal Cine */}
+          {showCine && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 transition-all"
+              onClick={handleCloseCine}
+            >
+              <div className="relative max-w-3xl w-full h-full flex items-center justify-center">
+                <img
+                  src={productImages[activeImage] || "/placeholder.svg"}
+                  alt={product.name}
+                  style={{ transform: `scale(${zoom})`, transition: 'transform 0.2s' }}
+                  className="max-h-[80vh] max-w-[90vw] object-contain cursor-zoom-out"
+                  onWheel={handleWheel}
+                  onClick={e => e.stopPropagation()}
+                />
+                {/* Navegación de imágenes */}
+                {productImages.length > 1 && (
+                  <>
+                    <button
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2"
+                      onClick={e => { e.stopPropagation(); setActiveImage((activeImage - 1 + productImages.length) % productImages.length); }}
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2"
+                      onClick={e => { e.stopPropagation(); setActiveImage((activeImage + 1) % productImages.length); }}
+                    >
+                      &#8594;
+                    </button>
+                  </>
+                )}
+                {/* Indicador de zoom */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black bg-opacity-50 px-3 py-1 rounded text-xs">Zoom: {zoom.toFixed(1)}x</div>
+                {/* Cerrar */}
+                <button
+                  className="absolute top-4 right-4 bg-black bg-opacity-60 text-white rounded-full p-2 text-lg"
+                  onClick={handleCloseCine}
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          )}
             {productImages.map((image, index) => (
               <div
                 key={index}
@@ -158,10 +220,10 @@ export default function ProductoDetalle({ params }) {
         {/* Información del Producto */}
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">{product.name}</h1>
-          <div className="text-xs text-gray-400">ID: {product.id}</div>
-          <div className="text-xs text-gray-400">Marca: {product.brand}</div>
-          <div className="text-xs text-gray-400">Creado: {product.createdAt}</div>
-          <div className="text-xs text-gray-400">Actualizado: {product.updatedAt}</div>
+          {/* <div className="text-xs text-gray-400">ID: {product.id}</div> */}
+          <div className="text-xl text-gray-400">Marca: {product.brand}</div>
+          {/* <div className="text-xs text-gray-400">Creado: {product.createdAt}</div> */}
+          {/* <div className="text-xs text-gray-400">Actualizado: {product.updatedAt}</div> */}
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm sm:text-base">
             <div className="flex items-center">
@@ -210,9 +272,9 @@ export default function ProductoDetalle({ params }) {
                   ))}
                 </>
               )}
-              <div className="text-xs text-gray-400">Stock: {product.stock}</div>
+              {/* <div className="text-xs text-gray-400">Stock: {product.stock}</div>
               <div className="text-xs text-gray-400">En stock: {product.inStock ? "Sí" : "No"}</div>
-              <div className="text-xs text-gray-400">Destacado: {product.featured ? "Sí" : "No"}</div>
+              <div className="text-xs text-gray-400">Destacado: {product.featured ? "Sí" : "No"}</div> */}
             </div>
           </div>
 
