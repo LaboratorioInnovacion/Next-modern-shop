@@ -261,17 +261,17 @@ export default function ProductoDetalle({ params }) {
           <div className="border-t border-slate-700 pt-4 sm:pt-6">
             <p className="text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">{product.description}</p>
             <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-              {product.features && product.features.length > 0 && (
+              {/* {product.features && product.features.length > 0 && ( */}
                 <>
-                  <div className="font-semibold text-white mb-2">Características:</div>
+                  {/* <div className="font-semibold text-white mb-2">Características:</div>
                   {product.features.map((feature, index) => (
                     <div key={index} className="flex items-start">
                       <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0 mt-0.5" />
                       <span className="text-gray-300 text-sm sm:text-base">{feature}</span>
                     </div>
-                  ))}
+                  ))} */}
                 </>
-              )}
+              {/* )} */}
               {/* <div className="text-xs text-gray-400">Stock: {product.stock}</div>
               <div className="text-xs text-gray-400">En stock: {product.inStock ? "Sí" : "No"}</div>
               <div className="text-xs text-gray-400">Destacado: {product.featured ? "Sí" : "No"}</div> */}
