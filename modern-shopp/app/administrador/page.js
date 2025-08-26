@@ -160,7 +160,7 @@ function DashboardStats({ stats }) {
 
 function ProductForm({ onSave, product, onCancel }) {
   const [form, setForm] = useState(product || {
-    name: '', description: '', price: '', image: '', brand: '', stock: '', features: ''
+    name: '', description: '', price: '', image: '', images: '', brand: '', stock: '', features: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -175,7 +175,8 @@ function ProductForm({ onSave, product, onCancel }) {
       ...form,
       price: parseFloat(form.price),
       stock: parseInt(form.stock),
-      features: form.features.split(',').map(f => f.trim())
+      features: form.features ? form.features.split(',').map(f => f.trim()) : [],
+      images: form.images ? form.images.split(',').map(url => url.trim()).filter(Boolean) : [],
     });
     setLoading(false);
   };
@@ -188,6 +189,7 @@ function ProductForm({ onSave, product, onCancel }) {
         <Input name="price" value={form.price} onChange={handleChange} placeholder="Precio" type="number" required />
         <Input name="stock" value={form.stock} onChange={handleChange} placeholder="Stock" type="number" required />
         <Input name="image" value={form.image} onChange={handleChange} placeholder="URL Imagen principal" required />
+        <Input name="images" value={form.images} onChange={handleChange} placeholder="URLs de imágenes (separadas por coma)" />
         <Input name="features" value={form.features} onChange={handleChange} placeholder="Características (separadas por coma)" />
       </div>
       <textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción" className="w-full border rounded p-2" required />

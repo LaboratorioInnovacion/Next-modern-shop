@@ -15,12 +15,20 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
+    // Desestructuramos y normalizamos images
+    let { images, ...rest } = body;
+    if (typeof images === 'string') {
+      images = images.split(',').map(url => url.trim()).filter(Boolean);
+    }
     const product = await prisma.product.create({
-      data: body
+      data: {
+        ...rest,
+        images: Array.isArray(images) ? images : [],
+      }
     });
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error('Error creating product:', error); // 👈 Agregá esto
+    console.error('Error creating product:', error);
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
 }

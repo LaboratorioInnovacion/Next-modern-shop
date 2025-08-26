@@ -25,6 +25,7 @@ export default function ProductoDetalle({ params }) {
     if (baseProduct) {
       setProduct(baseProduct)
       setLoading(false)
+      console.log(baseProduct)
     }
   }, [baseProduct])
 
@@ -40,14 +41,12 @@ export default function ProductoDetalle({ params }) {
     )
   }
 
-  // Simulamos múltiples imágenes
+  // Galería de imágenes reales del producto
   const productImages = [
-    product.image || "/placeholder.svg",
-    ...(product.images && product.images.length > 0 ? product.images : []),
-    "/placeholder.svg?height=600&width=600&text=Vista+Lateral",
-    "/placeholder.svg?height=600&width=600&text=Vista+Superior",
-    "/placeholder.svg?height=600&width=600&text=Accesorios",
-  ]
+    ...(product.images && Array.isArray(product.images) && product.images.length > 0
+      ? product.images.filter(url => !!url)
+      : [product.image || "/placeholder.svg"]),
+  ];
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity >= 1 && newQuantity <= (product.stock || 10)) {
