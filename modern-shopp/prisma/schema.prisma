@@ -62,6 +62,8 @@ model Product {
   wishlists     Wishlist[]  // Opposite relation to Wishlist
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+  sku          String?    
+  url String? 
 }
 
 model Category {

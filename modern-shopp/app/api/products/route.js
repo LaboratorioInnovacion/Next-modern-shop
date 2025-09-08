@@ -13,34 +13,38 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  let bodyText;
   try {
-    const body = await req.json();
+    bodyText = await req.text();
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error('Body recibido no es JSON válido:', bodyText);
+      return NextResponse.json({ error: 'Body no es JSON válido' }, { status: 400 });
+    }
     // Desestructuramos y normalizamos images
     let { images, ...rest } = body;
     if (typeof images === 'string') {
       images = images.split(',').map(url => url.trim()).filter(Boolean);
     }
-    const product = await prisma.product.create({
-      data: {
-        ...rest,
-        images: Array.isArray(images) ? images : [],
-      }
-    });
-    return NextResponse.json(product, { status: 201 });
+    const dataToInsert = {
+      ...rest,
+      images: Array.isArray(images) ? images : [],
+    };
+    console.log('Intentando insertar producto con data:', dataToInsert);
+    try {
+      const product = await prisma.product.create({
+        data: dataToInsert
+      });
+      return NextResponse.json(product, { status: 201 });
+    } catch (prismaError) {
+      console.error('Error de Prisma al crear producto:', prismaError);
+      return NextResponse.json({ error: 'Failed to create product', prisma: prismaError.message }, { status: 500 });
+    }
   } catch (error) {
-    console.error('Error creating product:', error);
+    console.error('Error inesperado creando producto:', error, 'Body recibido:', bodyText);
     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
   }
 }
 
-// export async function POST(req) {
-//   try {
-//     const body = await req.json();
-//     const product = await prisma.product.create({
-//       data: body
-//     });
-//     return NextResponse.json(product, { status: 201 });
-//   } catch (error) {
-//     return NextResponse.json({ error: 'Failed to create product' }, { status: 500 });
-//   }
-// }

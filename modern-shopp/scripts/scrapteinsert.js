@@ -33,11 +33,14 @@ const puppeteer = require('puppeteer');
 
 
     // Scraping de todas las páginas de productos
+
+    // Control de páginas a scrapear
+    const MAX_PAGES = 3; // Cambia este valor para limitar el scraping
     let currentPage = 1;
     let hasNext = true;
     const allProducts = [];
 
-    while (hasNext) {
+    while (hasNext && currentPage <= MAX_PAGES) {
       const url = `https://droppers.com.ar/productos.html?p=${currentPage}`;
       console.log(`Scrapeando página ${currentPage}: ${url}`);
       await page.goto(url, { waitUntil: 'networkidle2' });

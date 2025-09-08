@@ -27,11 +27,14 @@ GET {{baseUrl}}/auth/session
 ### Productos
 GET {{baseUrl}}/products
 
+### Productos
+
+
 POST {{baseUrl}}/products
 Content-Type: application/json
 
 {
-  "name": "Producto de prueba",
+  "name": "Producto de pruebaaa",
   "description": "Descripción",
   "price": 100,
   "image": "url.jpg",
