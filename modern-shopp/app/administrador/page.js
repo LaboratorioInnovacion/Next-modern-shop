@@ -10,7 +10,7 @@ const TABS = [
 ];
 function TabNav({ active, setActive }) {
   return (
-    <div className="flex gap-2 mb-6 border-b">
+  <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
       {TABS.map(tab => (
         <button
           key={tab.key}
@@ -26,7 +26,7 @@ function TabNav({ active, setActive }) {
 function UsersTable({ users, onDelete }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full rounded shadow">
+  <table className="min-w-full rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100">
         <thead>
           <tr>
             <th className="p-2">Nombre</th>
@@ -37,7 +37,7 @@ function UsersTable({ users, onDelete }) {
         </thead>
         <tbody>
           {users.map(user => (
-            <tr key={user.id} className="border-b">
+            <tr key={user.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2">{user.name}</td>
               <td className="p-2">{user.email}</td>
               <td className="p-2">{user.role}</td>
@@ -55,7 +55,7 @@ function UsersTable({ users, onDelete }) {
 function OrdersTable({ orders }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full rounded shadow">
+  <table className="min-w-full rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100">
         <thead>
           <tr>
             <th className="p-2">ID</th>
@@ -67,7 +67,7 @@ function OrdersTable({ orders }) {
         </thead>
         <tbody>
           {orders.map(order => (
-            <tr key={order.id} className="border-b">
+            <tr key={order.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2">{order.id}</td>
               <td className="p-2">{order.user?.name || '-'}</td>
               <td className="p-2">${order.total}</td>
@@ -84,7 +84,7 @@ function OrdersTable({ orders }) {
 function CouponsTable({ coupons, onDelete }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full rounded shadow">
+  <table className="min-w-full rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100">
         <thead>
           <tr>
             <th className="p-2">Código</th>
@@ -96,7 +96,7 @@ function CouponsTable({ coupons, onDelete }) {
         </thead>
         <tbody>
           {coupons.map(coupon => (
-            <tr key={coupon.id} className="border-b">
+            <tr key={coupon.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2">{coupon.code}</td>
               <td className="p-2">{coupon.type}</td>
               <td className="p-2">{coupon.value}</td>
@@ -115,7 +115,7 @@ function CouponsTable({ coupons, onDelete }) {
 function AddressesTable({ addresses, onDelete }) {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full rounded shadow">
+  <table className="min-w-full rounded shadow bg-white dark:bg-gray-900 dark:text-gray-100">
         <thead>
           <tr>
             <th className="p-2">Usuario</th>
@@ -127,7 +127,7 @@ function AddressesTable({ addresses, onDelete }) {
         </thead>
         <tbody>
           {addresses.map(addr => (
-            <tr key={addr.id} className="border-b">
+            <tr key={addr.id} className="border-b border-gray-200 dark:border-gray-700">
               <td className="p-2">{addr.userId}</td>
               <td className="p-2">{addr.address}</td>
               <td className="p-2">{addr.city}</td>
@@ -146,6 +146,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/contexts/toast-context';
 
 function DashboardStats({ stats }) {
   return (
@@ -163,6 +164,18 @@ function ProductForm({ onSave, product, onCancel }) {
     name: '', description: '', price: '', image: '', images: '', brand: '', stock: '', features: ''
   });
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const errs = {};
+    if (!form.name) errs.name = 'El nombre es obligatorio';
+    if (!form.brand) errs.brand = 'La marca es obligatoria';
+    if (!form.price || isNaN(form.price) || Number(form.price) <= 0) errs.price = 'Precio inválido';
+    if (!form.stock || isNaN(form.stock) || Number(form.stock) < 0) errs.stock = 'Stock inválido';
+    if (!form.image) errs.image = 'URL de imagen requerida';
+    if (!form.description) errs.description = 'Descripción requerida';
+    return errs;
+  };
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -170,6 +183,9 @@ function ProductForm({ onSave, product, onCancel }) {
 
   const handleSubmit = async e => {
     e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
     setLoading(true);
     await onSave({
       ...form,
@@ -182,17 +198,35 @@ function ProductForm({ onSave, product, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2 p-4 rounded shadow">
+  <form onSubmit={handleSubmit} className="space-y-2 p-4 rounded shadow bg-white border dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-        <Input name="name" value={form.name} onChange={handleChange} placeholder="Nombre" required />
-        <Input name="brand" value={form.brand} onChange={handleChange} placeholder="Marca" required />
-        <Input name="price" value={form.price} onChange={handleChange} placeholder="Precio" type="number" required />
-        <Input name="stock" value={form.stock} onChange={handleChange} placeholder="Stock" type="number" required />
-        <Input name="image" value={form.image} onChange={handleChange} placeholder="URL Imagen principal" required />
+        <div>
+          <Input name="name" value={form.name} onChange={handleChange} placeholder="Nombre" required />
+          {errors.name && <div className="text-red-500 text-xs">{errors.name}</div>}
+        </div>
+        <div>
+          <Input name="brand" value={form.brand} onChange={handleChange} placeholder="Marca" required />
+          {errors.brand && <div className="text-red-500 text-xs">{errors.brand}</div>}
+        </div>
+        <div>
+          <Input name="price" value={form.price} onChange={handleChange} placeholder="Precio" type="number" required />
+          {errors.price && <div className="text-red-500 text-xs">{errors.price}</div>}
+        </div>
+        <div>
+          <Input name="stock" value={form.stock} onChange={handleChange} placeholder="Stock" type="number" required />
+          {errors.stock && <div className="text-red-500 text-xs">{errors.stock}</div>}
+        </div>
+        <div>
+          <Input name="image" value={form.image} onChange={handleChange} placeholder="URL Imagen principal" required />
+          {errors.image && <div className="text-red-500 text-xs">{errors.image}</div>}
+        </div>
         <Input name="images" value={form.images} onChange={handleChange} placeholder="URLs de imágenes (separadas por coma)" />
         <Input name="features" value={form.features} onChange={handleChange} placeholder="Características (separadas por coma)" />
       </div>
-      <textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción" className="w-full border rounded p-2" required />
+      <div>
+        <textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción" className="w-full border rounded p-2" required />
+        {errors.description && <div className="text-red-500 text-xs">{errors.description}</div>}
+      </div>
       <div className="flex gap-2">
         <Button type="submit" disabled={loading}>{product ? 'Actualizar' : 'Crear'}</Button>
         {onCancel && <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>}
@@ -202,11 +236,25 @@ function ProductForm({ onSave, product, onCancel }) {
 }
 
 function ProductsTable({ products, onEdit, onDelete }) {
+  const [search, setSearch] = useState('');
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase()) ||
+    p.brand.toLowerCase().includes(search.toLowerCase())
+  );
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full rounded shadow">
+      <div className="mb-2 flex items-center gap-2">
+        <Input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por nombre o marca..."
+          className="max-w-xs"
+        />
+        {search && <Button size="sm" variant="outline" onClick={() => setSearch('')}>Limpiar</Button>}
+      </div>
+  <table className="min-w-full rounded shadow bg-white border dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
         <thead>
-          <tr className="">
+          <tr className="bg-gray-100 dark:bg-gray-800">
             <th className="p-2">Nombre</th>
             <th className="p-2">Marca</th>
             <th className="p-2">Precio</th>
@@ -215,8 +263,11 @@ function ProductsTable({ products, onEdit, onDelete }) {
           </tr>
         </thead>
         <tbody>
-          {products.map(prod => (
-            <tr key={prod.id} className="border-b">
+          {filtered.length === 0 && (
+            <tr><td colSpan={5} className="text-center p-4 text-gray-400 dark:text-gray-500">No hay productos</td></tr>
+          )}
+          {filtered.map(prod => (
+            <tr key={prod.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900 transition">
               <td className="p-2">{prod.name}</td>
               <td className="p-2">{prod.brand}</td>
               <td className="p-2">${prod.price}</td>
@@ -235,6 +286,7 @@ function ProductsTable({ products, onEdit, onDelete }) {
 
 export default function AdminPage() {
   const { user, isAuthenticated } = useAuth();
+  const { showToast } = useToast ? useToast() : { showToast: () => {} };
   const [activeTab, setActiveTab] = useState('products');
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0, sales: 0 });
   const [products, setProducts] = useState([]);
@@ -280,6 +332,13 @@ export default function AdminPage() {
     fetchAll();
   }, []);
 
+  // Confirmación personalizada
+  const confirmDialog = async (msg) => {
+    return new Promise((resolve) => {
+      if (window.confirm(msg)) resolve(true); else resolve(false);
+    });
+  };
+
   // CRUD handlers para cada entidad
   // Productos
   const handleSaveProduct = async (data) => {
@@ -305,27 +364,33 @@ export default function AdminPage() {
       setEditing(null);
       const updated = await fetch('/api/products').then(r => r.json());
       setProducts(updated);
+      showToast && showToast({ type: 'success', message: editing ? 'Producto actualizado' : 'Producto creado' });
     } catch (e) {
       setError(e.message);
+      showToast && showToast({ type: 'error', message: e.message });
     }
     setLoading(false);
   };
   const handleDeleteProduct = async (id) => {
-    if (!window.confirm('¿Eliminar producto?')) return;
+    const ok = await confirmDialog('¿Eliminar producto?');
+    if (!ok) return;
     setLoading(true);
     setError('');
     try {
       const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error eliminando producto');
       setProducts(products.filter(p => p.id !== id));
+      showToast && showToast({ type: 'success', message: 'Producto eliminado' });
     } catch (e) {
       setError(e.message);
+      showToast && showToast({ type: 'error', message: e.message });
     }
     setLoading(false);
   };
   // Usuarios
   const handleDeleteUser = async (id) => {
-    if (!window.confirm('¿Eliminar usuario?')) return;
+    const ok = await confirmDialog('¿Eliminar usuario?');
+    if (!ok) return;
     setLoading(true);
     setError('');
     try {
@@ -336,14 +401,17 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error('Error eliminando usuario');
       setUsers(users.filter(u => u.id !== id));
+      showToast && showToast({ type: 'success', message: 'Usuario eliminado' });
     } catch (e) {
       setError(e.message);
+      showToast && showToast({ type: 'error', message: e.message });
     }
     setLoading(false);
   };
   // Cupones
   const handleDeleteCoupon = async (id) => {
-    if (!window.confirm('¿Eliminar cupón?')) return;
+    const ok = await confirmDialog('¿Eliminar cupón?');
+    if (!ok) return;
     setLoading(true);
     setError('');
     try {
@@ -354,14 +422,17 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error('Error eliminando cupón');
       setCoupons(coupons.filter(c => c.id !== id));
+      showToast && showToast({ type: 'success', message: 'Cupón eliminado' });
     } catch (e) {
       setError(e.message);
+      showToast && showToast({ type: 'error', message: e.message });
     }
     setLoading(false);
   };
   // Direcciones
   const handleDeleteAddress = async (id) => {
-    if (!window.confirm('¿Eliminar dirección?')) return;
+    const ok = await confirmDialog('¿Eliminar dirección?');
+    if (!ok) return;
     setLoading(true);
     setError('');
     try {
@@ -372,8 +443,10 @@ export default function AdminPage() {
       });
       if (!res.ok) throw new Error('Error eliminando dirección');
       setAddresses(addresses.filter(a => a.id !== id));
+      showToast && showToast({ type: 'success', message: 'Dirección eliminada' });
     } catch (e) {
       setError(e.message);
+      showToast && showToast({ type: 'error', message: e.message });
     }
     setLoading(false);
   };
@@ -383,7 +456,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
+  <div className="max-w-6xl mx-auto p-4 bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors">
       <h1 className="text-3xl font-bold mb-4">Panel de Administración</h1>
       <DashboardStats stats={stats} />
       <TabNav active={activeTab} setActive={setActiveTab} />
