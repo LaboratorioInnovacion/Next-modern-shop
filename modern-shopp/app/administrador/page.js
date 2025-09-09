@@ -191,8 +191,8 @@ function ProductForm({ onSave, product, onCancel }) {
       ...form,
       price: parseFloat(form.price),
       stock: parseInt(form.stock),
-      features: form.features ? form.features.split(',').map(f => f.trim()) : [],
-      images: form.images ? form.images.split(',').map(url => url.trim()).filter(Boolean) : [],
+      features: typeof form.features === 'string' ? (form.features ? form.features.split(',').map(f => f.trim()) : []) : Array.isArray(form.features) ? form.features : [],
+      images: typeof form.images === 'string' ? (form.images ? form.images.split(',').map(url => url.trim()).filter(Boolean) : []) : Array.isArray(form.images) ? form.images : [],
     });
     setLoading(false);
   };
