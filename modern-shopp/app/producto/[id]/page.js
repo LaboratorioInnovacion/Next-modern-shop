@@ -99,10 +99,10 @@ export default function ProductoDetalle({ params }) {
         <Link href="/productos" className="hover:text-white transition-colors">
           Productos
         </Link>
-        <span className="mx-1 sm:mx-2">/</span>
+        {/* <span className="mx-1 sm:mx-2">/</span>
         <Link href={`/categorias`} className="hover:text-white transition-colors">
           {product.category === "electronics" ? "Electrónica" : product.category}
-        </Link>
+        </Link> */}
         <span className="mx-1 sm:mx-2">/</span>
         <span className="text-gray-300 truncate">{product.name}</span>
       </div>

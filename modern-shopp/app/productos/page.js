@@ -308,9 +308,9 @@ export default function ProductosPage() {
               {/* Price */}
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="flex items-center space-x-2">
-                  <span className="text-base sm:text-xl font-bold text-blue-400">{product.price}</span>
+                  <span className="text-base sm:text-xl font-bold text-blue-400">${product.price}</span>
                   {product.originalPrice && (
-                    <span className="text-xs sm:text-sm text-gray-500 line-through">{product.originalPrice}</span>
+                    <span className="text-xs sm:text-sm text-gray-500 line-through">${product.originalPrice}</span>
                   )}
                 </div>
               </div>
