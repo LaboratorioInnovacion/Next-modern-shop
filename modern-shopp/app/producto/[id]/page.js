@@ -221,7 +221,7 @@ export default function ProductoDetalle({ params }) {
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">{product.name}</h1>
           {/* <div className="text-xs text-gray-400">ID: {product.id}</div> */}
-          <div className="text-xl text-gray-400">Marca: {product.brand}</div>
+          {/* <div className="text-xl text-gray-400">Marca: {product.brand}</div> */}
           {/* <div className="text-xs text-gray-400">Creado: {product.createdAt}</div> */}
           {/* <div className="text-xs text-gray-400">Actualizado: {product.updatedAt}</div> */}
 
@@ -389,12 +389,12 @@ export default function ProductoDetalle({ params }) {
 
           <TabsContent value="descripcion" className="pt-4 sm:pt-6">
             <div className="prose prose-invert max-w-none">
-              {/* <p className="text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">{product.description}</p> */}
-              <p className="text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">
+              <p className="text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">{product.description}</p>
+              {/* <p className="text-gray-300 leading-relaxed mb-4 text-sm sm:text-base">
                 Estos audífonos representan la perfecta combinación entre tecnología avanzada y comodidad excepcional.
                 Diseñados para audiófilos y usuarios exigentes, ofrecen una experiencia de audio inmersiva sin
                 precedentes.
-              </p>
+              </p> */}
               <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4">Características Principales</h3>
               <ul className="space-y-2">
                 {product.features?.map((feature, index) => (

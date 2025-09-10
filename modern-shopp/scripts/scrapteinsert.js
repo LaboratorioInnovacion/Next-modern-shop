@@ -81,11 +81,11 @@ const puppeteer = require('puppeteer');
               const sku = document.querySelector('.product.attribute.sku .value')?.innerText?.trim() || '';
               // Descripción corta
               const description = document.querySelector('.product.attribute.overview .value')?.innerText?.trim() || '';
-              // Descripción larga (HTML)
+              // Descripción larga (solo texto)
               let longDescription = '';
               const descLong = document.querySelector('#description .product.attribute.description .value');
               if (descLong) {
-                longDescription = descLong.innerHTML?.trim() || '';
+                longDescription = descLong.innerText?.trim() || '';
               }
               // Imágenes
               let images = [];
