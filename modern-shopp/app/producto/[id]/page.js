@@ -1,5 +1,42 @@
 "use client"
 import React, { useState } from "react"
+
+// Mapeo de rangos de CP a provincias argentinas
+function getProvinciaByCP(cp) {
+  if (!/^[0-9]{4,5}$/.test(cp)) return "";
+  const n = parseInt(cp, 10);
+  if (n >= 1000 && n < 2000) return "Ciudad Autónoma de Buenos Aires";
+  if (n >= 2000 && n < 3000) return "Provincia de Buenos Aires";
+  if (n >= 3000 && n < 3700) return "Santa Fe";
+  if (n >= 3700 && n < 3800) return "Santiago del Estero";
+  if (n >= 3800 && n < 4000) return "Tucumán";
+  if (n >= 4000 && n < 4200) return "Salta";
+  if (n >= 4200 && n < 4400) return "Jujuy";
+  if (n >= 4400 && n < 4600) return "Salta";
+  if (n >= 4600 && n < 4700) return "Jujuy";
+  if (n >= 4700 && n < 4900) return "Catamarca";
+  if (n >= 4900 && n < 5300) return "Santiago del Estero";
+  if (n >= 5300 && n < 5400) return "La Rioja";
+  if (n >= 5400 && n < 5500) return "San Juan";
+  if (n >= 5500 && n < 5700) return "Mendoza";
+  if (n >= 5700 && n < 5900) return "San Luis";
+  if (n >= 5900 && n < 6000) return "La Pampa";
+  if (n >= 6000 && n < 6300) return "Buenos Aires (Sur)";
+  if (n >= 6300 && n < 6400) return "La Pampa";
+  if (n >= 6400 && n < 6500) return "Neuquén";
+  if (n >= 6500 && n < 6600) return "Río Negro";
+  if (n >= 6600 && n < 6700) return "Chubut";
+  if (n >= 6700 && n < 6900) return "Santa Cruz";
+  if (n >= 6900 && n < 7000) return "Tierra del Fuego";
+  if (n >= 7000 && n < 8000) return "Chaco";
+  if (n >= 8000 && n < 8300) return "Formosa";
+  if (n >= 8300 && n < 8500) return "Neuquén";
+  if (n >= 8500 && n < 9000) return "Río Negro";
+  if (n >= 9000 && n < 9400) return "Buenos Aires (Sur)";
+  if (n >= 9400 && n < 9500) return "Santa Cruz";
+  if (n >= 9500 && n < 9900) return "Tierra del Fuego";
+  return "";
+}
 import { useProducts } from "@/contexts/product-context"
 import { useCart } from "@/contexts/cart-context"
 import { Button } from "@/components/ui/button"
@@ -9,9 +46,52 @@ import { Star, Heart, Share2, ShoppingCart, Truck, Shield, Plus, Minus, Check, A
 import Link from "next/link"
 
 export default function ProductoDetalle({ params }) {
-  // Estado para modo cine y zoom
+
+  // Todos los hooks deben ir aquí arriba, antes de cualquier return
   const [showCine, setShowCine] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const { getProductById } = useProducts();
+  const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [product, setProduct] = useState(undefined);
+  const [postalCode, setPostalCode] = useState("");
+  const [shippingPrice, setShippingPrice] = useState(null);
+  const SHIPPING_COST = 8690; // Valor fijo en ARS
+
+  // Obtener producto por ID o usar datos de ejemplo
+  const baseProduct = getProductById(params.id) || getProductById(Number(params.id));
+
+  // Espera a que baseProduct esté definido
+  React.useEffect(() => {
+    if (baseProduct) {
+      setProduct(baseProduct);
+      setLoading(false);
+      console.log(baseProduct);
+    }
+  }, [baseProduct]);
+
+  // Si no hay producto, muestra loading
+  if (loading || !product) {
+    return (
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+        <div className="text-center py-20 text-white">
+          <h2 className="text-2xl font-bold mb-4">Cargando producto...</h2>
+          <p className="text-gray-400">Por favor espera mientras se carga la información del producto.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Galería de imágenes reales del producto
+  const productImages = [
+    ...(product.images && Array.isArray(product.images) && product.images.length > 0
+      ? product.images.filter(url => !!url)
+      : [product.image || "/placeholder.svg"]),
+  ];
+
   const handleOpenCine = () => {
     setShowCine(true);
     setZoom(1);
@@ -26,67 +106,40 @@ export default function ProductoDetalle({ params }) {
     newZoom = Math.max(1, Math.min(newZoom, 3));
     setZoom(newZoom);
   };
-  const { getProductById } = useProducts()
-  const { addToCart } = useCart()
-  const [quantity, setQuantity] = useState(1)
-  const [activeImage, setActiveImage] = useState(0)
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
-
-  // Obtener producto por ID o usar datos de ejemplo
-  const baseProduct = getProductById(params.id) || getProductById(Number(params.id))
-  const [loading, setLoading] = useState(true)
-  const [product, setProduct] = useState(undefined)
-
-  // Espera a que baseProduct esté definido
-  React.useEffect(() => {
-    if (baseProduct) {
-      setProduct(baseProduct)
-      setLoading(false)
-      console.log(baseProduct)
-    }
-  }, [baseProduct])
-
-  // Si no hay producto, muestra loading
-  if (loading || !product) {
-    return (
-      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
-        <div className="text-center py-20 text-white">
-          <h2 className="text-2xl font-bold mb-4">Cargando producto...</h2>
-          <p className="text-gray-400">Por favor espera mientras se carga la información del producto.</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Galería de imágenes reales del producto
-  const productImages = [
-    ...(product.images && Array.isArray(product.images) && product.images.length > 0
-      ? product.images.filter(url => !!url)
-      : [product.image || "/placeholder.svg"]),
-  ];
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity >= 1 && newQuantity <= (product.stock || 10)) {
-      setQuantity(newQuantity)
+      setQuantity(newQuantity);
     }
-  }
+  };
+
+  // Simulación de cálculo de envío (puedes reemplazar por lógica real)
+  const handlePostalCodeChange = (e) => {
+    const value = e.target.value;
+    setPostalCode(value);
+    if (value.length >= 4) {
+      setShippingPrice(SHIPPING_COST);
+    } else {
+      setShippingPrice(null);
+    }
+  };
 
   const handleAddToCart = async () => {
-    setIsAddingToCart(true)
+    setIsAddingToCart(true);
 
     // Simular un pequeño delay para mejor UX
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Agregar al carrito con la cantidad seleccionada
     for (let i = 0; i < quantity; i++) {
-      addToCart(product)
+      addToCart(product);
     }
 
-    setIsAddingToCart(false)
-  }
+    setIsAddingToCart(false);
+  };
 
-  const isOutOfStock = !product.inStock || (product.stock && product.stock === 0)
-  const isLowStock = product.stock && product.stock < 5
+  const isOutOfStock = !product.inStock || (product.stock && product.stock === 0);
+  const isLowStock = product.stock && product.stock < 5;
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
@@ -278,7 +331,7 @@ export default function ProductoDetalle({ params }) {
             {/* </div> */}
           {/* </div> */}
 
-          {/* Selector de Cantidad */}
+          {/* Selector de Cantidad y Código Postal */}
           <div className="space-y-3">
             <label className="block text-gray-300 font-medium text-sm sm:text-base">Cantidad</label>
             <div className="flex items-center gap-3 sm:gap-4">
@@ -306,6 +359,29 @@ export default function ProductoDetalle({ params }) {
                 </Button>
               </div>
               <div className="text-xs sm:text-sm text-gray-400">{product.stock && `${product.stock} disponibles`}</div>
+            </div>
+            {/* Input para código postal */}
+            <div className="mt-2">
+              <label className="block text-gray-300 font-medium text-sm mb-1">Código Postal</label>
+              <input
+                type="text"
+                value={postalCode}
+                onChange={handlePostalCodeChange}
+                maxLength={8}
+                placeholder="Ej: 1406"
+                className="bg-slate-700 border border-slate-600 rounded px-3 py-2 text-white w-full sm:w-48 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {postalCode && (
+                <div className="mt-2 text-sm text-blue-400 font-semibold">
+                  {shippingPrice !== null
+                    ? (
+                        <>
+                          Precio Envío a {getProvinciaByCP(postalCode)} a ${shippingPrice.toLocaleString("es-AR")} ARS
+                        </>
+                      )
+                    : "Ingresa un código postal válido para calcular el envío"}
+                </div>
+              )}
             </div>
           </div>
 
@@ -349,14 +425,14 @@ export default function ProductoDetalle({ params }) {
               <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
               <div>
                 <p className="font-medium text-white text-sm sm:text-base">Envío Gratis</p>
-                <p className="text-xs sm:text-sm text-gray-400">En pedidos superiores a $50</p>
+                <p className="text-xs sm:text-sm text-gray-400">En pedidos superiores a $100.000</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 sm:space-x-4">
               <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
               <div>
-                <p className="font-medium text-white text-sm sm:text-base">Garantía de 2 años</p>
-                <p className="text-xs sm:text-sm text-gray-400">Devolución sin preguntas en 30 días</p>
+                <p className="font-medium text-white text-sm sm:text-base">Garantía de 6 meses</p>
+                <p className="text-xs sm:text-sm text-gray-400">Devolución sin preguntas en 15 días</p>
               </div>
             </div>
           </div>
