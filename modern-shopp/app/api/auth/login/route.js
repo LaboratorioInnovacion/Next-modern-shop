@@ -5,21 +5,22 @@ import bcrypt from "bcryptjs"
 import { signJWT } from "@/lib/jwt"
 
 export async function POST(req) {
-  const { email, password } = await req.json()
+  const { email, password } = await req.json();
 
   if (!email || !password) {
-    return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 })
+    return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user || !bcrypt.compareSync(password, user.password)) {
-    return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
+    return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
   }
 
-  const token = signJWT(user)
+  const token = signJWT(user);
 
-  return NextResponse.json({
+  // Set cookie httpOnly
+  const response = NextResponse.json({
     user: {
       id: user.id,
       name: user.name,
@@ -28,10 +29,51 @@ export async function POST(req) {
       addresses: user.addresses,
       orders: [],
     },
-    token,
-  })
+  });
+  response.cookies.set('token', token, {
+    httpOnly: true,
+    path: '/',
+    sameSite: 'lax',
+    secure: true,
+    maxAge: 60 * 60 * 24 * 7, // 7 días
+  });
+  return response;
 }
+///////////////codigoanteior
 
+// // ✅ API: /api/auth/login/route.js
+// import { NextResponse } from "next/server"
+// import { prisma } from "@/lib/db"
+// import bcrypt from "bcryptjs"
+// import { signJWT } from "@/lib/jwt"
+
+// export async function POST(req) {
+//   const { email, password } = await req.json()
+
+//   if (!email || !password) {
+//     return NextResponse.json({ error: "Email y contraseña requeridos" }, { status: 400 })
+//   }
+
+//   const user = await prisma.user.findUnique({ where: { email } })
+
+//   if (!user || !bcrypt.compareSync(password, user.password)) {
+//     return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 })
+//   }
+
+//   const token = signJWT(user)
+
+//   return NextResponse.json({
+//     user: {
+//       id: user.id,
+//       name: user.name,
+//       email: user.email,
+//       avatar: user.avatar,
+//       addresses: user.addresses,
+//       orders: [],
+//     },
+//     token,
+//   })
+// }
 // import { NextResponse } from "next/server"
 // import { prisma } from "@/lib/prisma"
 // import bcrypt from "bcryptjs"
