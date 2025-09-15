@@ -126,15 +126,8 @@ export default function ProductoDetalle({ params }) {
 
   const handleAddToCart = async () => {
     setIsAddingToCart(true);
-
-    // Simular un pequeño delay para mejor UX
     await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Agregar al carrito con la cantidad seleccionada
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
-
+    addToCart(product, quantity);
     setIsAddingToCart(false);
   };
 

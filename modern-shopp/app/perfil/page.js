@@ -314,7 +314,7 @@ export default function PerfilPage() {
                     </div>
                   </div>
                   <span className="text-2xl font-bold text-green-400">
-                    €{orders.reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
+                    ${orders.reduce((sum, order) => sum + (order.total || 0), 0).toFixed(2)}
                   </span>
                 </div>
 
@@ -363,7 +363,7 @@ export default function PerfilPage() {
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-blue-400">€{order.total?.toFixed(2) ?? "-"}</p>
+                      <p className="text-2xl font-bold text-blue-400">${order.total?.toFixed(2) ?? "-"}</p>
                       <p className="text-gray-400 text-sm">{order.items?.length || 0} productos</p>
                     </div>
                   </div>
@@ -374,7 +374,7 @@ export default function PerfilPage() {
                       <div className="space-y-1">
                         {order.items?.map((item, index) => (
                           <p key={index} className="text-gray-300 text-sm">
-                            {item.quantity}x {item.product?.name || item.productName} - €{item.price?.toFixed(2) ?? "-"}
+                            {item.quantity}x {item.product?.name || item.productName} - ${item.price?.toFixed(2) ?? "-"}
                           </p>
                         ))}
                       </div>
@@ -1006,7 +1006,7 @@ export default function PerfilPage() {
 //                     </div>
 //                   </div>
 //                   <span className="text-2xl font-bold text-green-400">
-//                     €{mockOrders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+//                     ${mockOrders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
 //                   </span>
 //                 </div>
 
@@ -1046,7 +1046,7 @@ export default function PerfilPage() {
 //                       </span>
 //                     </div>
 //                     <div className="text-right">
-//                       <p className="text-2xl font-bold text-blue-400">€{order.total.toFixed(2)}</p>
+//                       <p className="text-2xl font-bold text-blue-400">${order.total.toFixed(2)}</p>
 //                       <p className="text-gray-400 text-sm">{order.items} productos</p>
 //                     </div>
 //                   </div>
@@ -1057,7 +1057,7 @@ export default function PerfilPage() {
 //                       <div className="space-y-1">
 //                         {order.products.map((product, index) => (
 //                           <p key={index} className="text-gray-300 text-sm">
-//                             {product.quantity}x {product.name} - €{product.price}
+//                             {product.quantity}x {product.name} - ${product.price}
 //                           </p>
 //                         ))}
 //                       </div>

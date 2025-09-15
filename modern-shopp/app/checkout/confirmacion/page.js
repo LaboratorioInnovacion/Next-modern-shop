@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -29,7 +28,7 @@ export default function ConfirmacionPage() {
         return;
       }
       try {
-        const res = await fetch(`/api/orders?id=${transactionId}`);
+        const res = await fetch(`/api/orders/${transactionId}`);
         if (res.ok) {
           const data = await res.json();
           setOrderDetails(data);

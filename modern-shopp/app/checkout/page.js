@@ -78,8 +78,7 @@ export default function CheckoutPage() {
 
   const subtotal = getTotalPrice()
   const shipping = subtotal > 50 ? 0 : 9.99
-  // const tax = subtotal * 0.21 // IVA 21%
-  const tax = subtotal // IVA 21%
+  const tax = subtotal * 0.21 // IVA 21%
   const total = subtotal + shipping + tax
 
   const handleInputChange = (e) => {
@@ -763,7 +762,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <Lock className="w-4 h-4 mr-2" />
-                        Confirmar y Pagar ${total.toFixed(2)}
+                        Confirmar y Pagar €{total.toFixed(2)}
                       </>
                     )}
                   </Button>
@@ -801,20 +800,20 @@ export default function CheckoutPage() {
               <div className="border-t border-slate-600 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Subtotal</span>
-                  <span className="text-white">${subtotal.toFixed(2)}</span>
+                  <span className="text-white">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Envío</span>
-                  <span className="text-white">{shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}</span>
+                  <span className="text-white">{shipping === 0 ? "Gratis" : `€${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">IVA (21%)</span>
-                  <span className="text-white">${tax.toFixed(2)}</span>
+                  <span className="text-white">€{tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-slate-600 pt-2">
                   <div className="flex justify-between">
                     <span className="text-lg sm:text-xl font-bold text-white">Total</span>
-                    <span className="text-xl sm:text-2xl font-bold text-blue-400">${total.toFixed(2)}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-blue-400">€{total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -842,8 +841,7 @@ export default function CheckoutPage() {
   )
 }
 
-
-
+////////////////codigo anterior
 // "use client"
 
 // import { useState, useEffect } from "react"
@@ -1013,7 +1011,51 @@ export default function CheckoutPage() {
 //           })
 //         });
 //         const data = await res.json();
-//         if (data.init_point) {
+//         if (data.init_point && data.preference_id) {
+//           // Crear la orden en la base de datos con el external_reference (preference_id)
+//           const orderRes = await fetch("/api/orders", {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//               userId: user?.id || null,
+//               status: "pendiente_pago",
+//               total,
+//               subtotal,
+//               tax,
+//               shipping,
+//               shippingAddress: {
+//                 firstName: formData.firstName,
+//                 lastName: formData.lastName,
+//                 email: formData.email,
+//                 phone: formData.phone,
+//                 address: formData.address,
+//                 city: formData.city,
+//                 state: formData.state,
+//                 zipCode: formData.zipCode,
+//                 country: formData.country
+//               },
+//               billingAddress: {
+//                 firstName: formData.firstName,
+//                 lastName: formData.lastName,
+//                 email: formData.email,
+//                 phone: formData.phone,
+//                 address: formData.address,
+//                 city: formData.city,
+//                 state: formData.state,
+//                 zipCode: formData.zipCode,
+//                 country: formData.country
+//               },
+//               paymentMethod,
+//               paymentStatus: "pendiente",
+//               externalReference: data.preference_id,
+//               items: items.map(item => ({
+//                 productId: item.id,
+//                 quantity: item.quantity,
+//                 price: item.price
+//               }))
+//             })
+//           });
+//           // Redirigir a MercadoPago aunque la orden falle
 //           window.location.href = data.init_point;
 //           return;
 //         } else {
@@ -1024,12 +1066,69 @@ export default function CheckoutPage() {
 //       }
 //       return;
 //     }
-//         if (paymentMethod === "transferencia") {
-//           clearCart();
-//           resetCheckout();
-//           router.push(`/checkout/confirmacion?id=transferencia`);
-//           return;
-//         }
+//     // Para cualquier método, crear la orden en la base de datos
+//     let status = "pendiente";
+//     let paymentStatus = "pendiente";
+//     if (paymentMethod === "card" || paymentMethod === "paypal") {
+//       status = "pagado";
+//       paymentStatus = "pagado";
+//     }
+//     try {
+//       const orderRes = await fetch("/api/orders", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({
+//           userId: user?.id || null,
+//           status,
+//           total,
+//           subtotal,
+//           tax,
+//           shipping,
+//           shippingAddress: {
+//             firstName: formData.firstName,
+//             lastName: formData.lastName,
+//             email: formData.email,
+//             phone: formData.phone,
+//             address: formData.address,
+//             city: formData.city,
+//             state: formData.state,
+//             zipCode: formData.zipCode,
+//             country: formData.country
+//           },
+//           billingAddress: {
+//             firstName: formData.firstName,
+//             lastName: formData.lastName,
+//             email: formData.email,
+//             phone: formData.phone,
+//             address: formData.address,
+//             city: formData.city,
+//             state: formData.state,
+//             zipCode: formData.zipCode,
+//             country: formData.country
+//           },
+//           paymentMethod,
+//           paymentStatus,
+//           items: items.map(item => ({
+//             productId: item.id,
+//             quantity: item.quantity,
+//             price: item.price
+//           }))
+//         })
+//       });
+//       if (orderRes.ok) {
+//         const order = await orderRes.json();
+//         clearCart();
+//         resetCheckout();
+//         router.push(`/checkout/confirmacion?id=${order.id}`);
+//         return;
+//       } else {
+//         alert("Error al crear la orden");
+//         return;
+//       }
+//     } catch (err) {
+//       alert("Error al crear la orden");
+//       return;
+//     }
 //     // Flujo normal para otros métodos
 //     const paymentData = {
 //       amount: total,
@@ -1507,7 +1606,7 @@ export default function CheckoutPage() {
 //                     ) : (
 //                       <>
 //                         <Lock className="w-4 h-4 mr-2" />
-//                         Confirmar y Pagar ${total.toFixed(2)}
+//                         Confirmar y Pagar €{total.toFixed(2)}
 //                       </>
 //                     )}
 //                   </Button>
@@ -1545,20 +1644,20 @@ export default function CheckoutPage() {
 //               <div className="border-t border-slate-600 pt-4 space-y-2">
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">Subtotal</span>
-//                   <span className="text-white">${subtotal.toFixed(2)}</span>
+//                   <span className="text-white">€{subtotal.toFixed(2)}</span>
 //                 </div>
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">Envío</span>
-//                   <span className="text-white">{shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}</span>
+//                   <span className="text-white">{shipping === 0 ? "Gratis" : `€${shipping.toFixed(2)}`}</span>
 //                 </div>
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">IVA (21%)</span>
-//                   <span className="text-white">${tax.toFixed(2)}</span>
+//                   <span className="text-white">€{tax.toFixed(2)}</span>
 //                 </div>
 //                 <div className="border-t border-slate-600 pt-2">
 //                   <div className="flex justify-between">
 //                     <span className="text-lg sm:text-xl font-bold text-white">Total</span>
-//                     <span className="text-xl sm:text-2xl font-bold text-blue-400">${total.toFixed(2)}</span>
+//                     <span className="text-xl sm:text-2xl font-bold text-blue-400">€{total.toFixed(2)}</span>
 //                   </div>
 //                 </div>
 //               </div>
@@ -1585,3 +1684,4 @@ export default function CheckoutPage() {
 //     </div>
 //   )
 // }
+
