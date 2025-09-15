@@ -306,7 +306,7 @@ export default function ProductoDetalle({ params }) {
             )}
             {product.discount && (
               <span className="bg-blue-500/10 text-blue-400 px-2 py-1 sm:px-3 sm:py-1 text-sm font-semibold rounded">
-                Ahorras {product.discount}
+                Ahorras ${product.discount}
               </span>
             )}
           </div>

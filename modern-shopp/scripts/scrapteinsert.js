@@ -35,7 +35,7 @@ const puppeteer = require('puppeteer');
     // Scraping de todas las páginas de productos
 
     // Control de páginas a scrapear
-    const MAX_PAGES = 3; // Cambia este valor para limitar el scraping
+    const MAX_PAGES = 1; // Cambia este valor para limitar el scraping
     let currentPage = 1;
     let hasNext = true;
     const allProducts = [];
@@ -73,14 +73,18 @@ const puppeteer = require('puppeteer');
               let price = null;
               const sug = document.querySelector('.suggested-price .price');
               if (sug) {
-                price = parseFloat(sug.innerText.replace(/[^\d,\.]/g, '').replace(',', '.'));
+                // Elimina puntos y comas, deja solo el separador decimal
+                let clean = sug.innerText.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+                price = parseFloat(clean);
               }
               // Si no hay sugerido, fallback a price normal
               if (!price) {
-                price = parseFloat(document.querySelector('meta[itemprop="price"]')?.content || document.querySelector('.price')?.innerText?.replace(/[^\d,\.]/g, '').replace(',', '.') || '0');
+                let raw = document.querySelector('meta[itemprop="price"]')?.content || document.querySelector('.price')?.innerText || '0';
+                let clean = raw.replace(/\./g, '').replace(/,/g, '.').replace(/[^0-9.]/g, '');
+                price = parseFloat(clean);
               }
               // originalPrice = price + 10%
-              let originalPrice = price ? Number((price * 1.1).toFixed(2)) : null;
+              let originalPrice = price ? parseFloat((price * 1.1).toFixed(3)) : null;
               // SKU
               const sku = document.querySelector('.product.attribute.sku .value')?.innerText?.trim() || '';
               // Descripción corta
@@ -133,12 +137,19 @@ const puppeteer = require('puppeteer');
               };
             });
             // Estructura según modelo Prisma Product
+            // price se extrae tal cual, originalPrice y discount se guardan como enteros
+            const price = details.price ? Math.round(details.price) : 0;
+            let originalPrice = details.originalPrice !== null ? Math.round(details.originalPrice) : null;
+            let discount = null;
+            if (originalPrice !== null && price !== null) {
+              discount = originalPrice - price;
+            }
             allProducts.push({
               name: details.name,
               description: details.longDescription || details.description,
-              price: details.price || 0,
-              originalPrice: details.originalPrice ? Number(details.originalPrice.toFixed(2)) : null,
-              discount: details.originalPrice && details.price ? Number(((100 - (details.price / details.originalPrice) * 100).toFixed(2))) : null,
+              price,
+              originalPrice,
+              discount,
               image: details.image,
               images: details.images,
               brand: '',

@@ -250,7 +250,7 @@ export default function ProductosPage() {
                 {product.discount && (
                   <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
                     <span className="bg-blue-500 text-white px-2 py-1 text-xs font-bold rounded">
-                      -{product.discount}
+                      $-{product.discount}
                     </span>
                   </div>
                 )}

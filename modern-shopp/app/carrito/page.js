@@ -86,10 +86,10 @@ export default function CarritoPage() {
                       </h3>
                       <p className="text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3 line-clamp-2">{item.description}</p>
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">{item.price}</span>
+                        <span className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">${item.price}</span>
                         {item.originalPrice && (
                           <span className="text-sm sm:text-base md:text-lg text-gray-500 line-through">
-                            {item.originalPrice}
+                            ${item.originalPrice}
                           </span>
                         )}
                       </div>
