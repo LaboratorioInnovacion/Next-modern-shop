@@ -173,7 +173,7 @@ export default function Header() {
       </header>
       <CartDropdown />
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} defaultMode="login" />
-      <MobileMenu isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} />
+  <MobileMenu isOpen={showMobileMenu} onClose={() => setShowMobileMenu(false)} onShowAuthModal={() => setShowAuthModal(true)} />
       <SearchModal isOpen={showSearchModal} onClose={() => setShowSearchModal(false)} />
     </>
   )

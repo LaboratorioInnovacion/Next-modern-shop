@@ -125,8 +125,8 @@ export default function MobileMenu({ isOpen, onClose }) {
                     variant="outline"
                     className="w-full border-slate-700 text-red-400 hover:text-red-300 hover:bg-red-500/10 bg-transparent"
                     onClick={() => {
-                      logout()
-                      onClose()
+                      logout();
+                      onClose();
                     }}
                   >
                     Cerrar Sesión
@@ -138,7 +138,10 @@ export default function MobileMenu({ isOpen, onClose }) {
                 <Button
                   variant="outline"
                   className="w-full border-slate-700 text-white bg-transparent"
-                  onClick={onClose}
+                  onClick={() => {
+                    if (onShowAuthModal) onShowAuthModal();
+                    onClose();
+                  }}
                 >
                   Iniciar Sesión
                 </Button>
