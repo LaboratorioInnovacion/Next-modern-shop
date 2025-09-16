@@ -762,7 +762,7 @@ export default function CheckoutPage() {
                     ) : (
                       <>
                         <Lock className="w-4 h-4 mr-2" />
-                        Confirmar y Pagar €{total.toFixed(2)}
+                        Confirmar y Pagar ${total.toFixed(2)}
                       </>
                     )}
                   </Button>
@@ -800,20 +800,20 @@ export default function CheckoutPage() {
               <div className="border-t border-slate-600 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Subtotal</span>
-                  <span className="text-white">€{subtotal.toFixed(2)}</span>
+                  <span className="text-white">${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Envío</span>
-                  <span className="text-white">{shipping === 0 ? "Gratis" : `€${shipping.toFixed(2)}`}</span>
+                  <span className="text-white">{shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">IVA (21%)</span>
-                  <span className="text-white">€{tax.toFixed(2)}</span>
+                  <span className="text-white">${tax.toFixed(2)}</span>
                 </div>
                 <div className="border-t border-slate-600 pt-2">
                   <div className="flex justify-between">
                     <span className="text-lg sm:text-xl font-bold text-white">Total</span>
-                    <span className="text-xl sm:text-2xl font-bold text-blue-400">€{total.toFixed(2)}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-blue-400">${total.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -1606,7 +1606,7 @@ export default function CheckoutPage() {
 //                     ) : (
 //                       <>
 //                         <Lock className="w-4 h-4 mr-2" />
-//                         Confirmar y Pagar €{total.toFixed(2)}
+//                         Confirmar y Pagar ${total.toFixed(2)}
 //                       </>
 //                     )}
 //                   </Button>
@@ -1644,20 +1644,20 @@ export default function CheckoutPage() {
 //               <div className="border-t border-slate-600 pt-4 space-y-2">
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">Subtotal</span>
-//                   <span className="text-white">€{subtotal.toFixed(2)}</span>
+//                   <span className="text-white">${subtotal.toFixed(2)}</span>
 //                 </div>
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">Envío</span>
-//                   <span className="text-white">{shipping === 0 ? "Gratis" : `€${shipping.toFixed(2)}`}</span>
+//                   <span className="text-white">{shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}</span>
 //                 </div>
 //                 <div className="flex justify-between text-sm">
 //                   <span className="text-gray-400">IVA (21%)</span>
-//                   <span className="text-white">€{tax.toFixed(2)}</span>
+//                   <span className="text-white">${tax.toFixed(2)}</span>
 //                 </div>
 //                 <div className="border-t border-slate-600 pt-2">
 //                   <div className="flex justify-between">
 //                     <span className="text-lg sm:text-xl font-bold text-white">Total</span>
-//                     <span className="text-xl sm:text-2xl font-bold text-blue-400">€{total.toFixed(2)}</span>
+//                     <span className="text-xl sm:text-2xl font-bold text-blue-400">${total.toFixed(2)}</span>
 //                   </div>
 //                 </div>
 //               </div>
