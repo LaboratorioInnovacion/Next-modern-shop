@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 
+
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
@@ -39,26 +40,26 @@ export default function Hero() {
 
   useEffect(() => {
     setIsVisible(true)
-    // Generar partículas solo en el cliente
-    const generatedParticles = Array.from({ length: 20 }, () => ({
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      animationDelay: `${Math.random() * 3}s`,
-      animationDuration: `${2 + Math.random() * 3}s`,
-    }))
-    setParticles(generatedParticles)
-
+    // Solo mostrar partículas en desktop
+    if (window.innerWidth >= 768) {
+      const generatedParticles = Array.from({ length: 20 }, () => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDelay: `${Math.random() * 3}s`,
+        animationDuration: `${2 + Math.random() * 3}s`,
+      }))
+      setParticles(generatedParticles)
+    }
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length)
     }, 6000)
-
     return () => clearInterval(interval)
   }, [])
 
   const currentSlideData = slides[currentSlide]
 
   return (
-    <section className="relative min-h-[70vh] sm:min-h-[80vh] md:min-h-[90vh] lg:h-screen bg-cover bg-center overflow-hidden">
+    <section className="relative min-h-[60vh] sm:min-h-[80vh] md:min-h-[90vh] lg:h-screen bg-cover bg-center overflow-hidden flex items-center justify-center">
       {/* Background Images with Transition */}
       {slides.map((slide, index) => (
         <div
@@ -73,14 +74,12 @@ export default function Hero() {
       ))}
 
       {/* Gradient Overlays */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-r ${currentSlideData.gradient} transition-all duration-1000`}
-      ></div>
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900/60"></div>
+      <div className={`absolute inset-0 bg-gradient-to-r ${currentSlideData.gradient} transition-all duration-1000`}></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/60 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-900/80"></div>
 
-      {/* Animated Particles */}
-      <div className="absolute inset-0 overflow-hidden">
+      {/* Animated Particles solo en desktop */}
+      <div className="absolute inset-0 overflow-hidden hidden md:block">
         {particles.map((p, i) => (
           <div
             key={i}
@@ -95,21 +94,23 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="relative container mx-auto px-4 py-8 sm:py-12 md:py-16 lg:py-0 h-full flex items-center">
-        <div className="max-w-4xl space-y-4 sm:space-y-6 md:space-y-8">
+      {/* <div className="relative w-full flex flex-col items-center justify-center px-4 py-10 sm:py-12 md:py-16 lg:py-0 h-full"> */}
+  <div className="relative w-full flex flex-col items-center justify-center px-4 py-10 sm:py-12 md:py-16 lg:py-0 h-full min-h-[100vh]">
+
+        <div className="max-w-2xl w-full mx-auto space-y-4 sm:space-y-6 md:space-y-8 text-center">
           {/* Badge with Animation */}
           <div
-            className={`inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-blue-500/20 backdrop-blur-sm rounded-full border border-blue-500/30 transform transition-all duration-1000 ${
+            className={`inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-3 bg-blue-500/20 backdrop-blur-sm rounded-full border border-blue-500/30 mx-auto transform transition-all duration-1000 ${
               isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
             }`}
           >
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-blue-300 mr-1.5 sm:mr-2 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-blue-300 mr-2 animate-pulse" />
             <span className="text-blue-300 text-xs sm:text-sm font-medium">✨ Nuevas ofertas disponibles</span>
           </div>
 
-          {/* Main Title with Stagger Animation */}
+          {/* Main Title con mejor tamaño en mobile */}
           <div className="space-y-1 sm:space-y-2 md:space-y-4">
-            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold leading-tight">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-8xl font-bold leading-tight">
               <span
                 className={`block bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent transform transition-all duration-1000 delay-200 ${
                   isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
@@ -127,42 +128,42 @@ export default function Hero() {
             </h1>
           </div>
 
-          {/* Description */}
+          {/* Description con mejor legibilidad en mobile */}
           <p
-            className={`text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 leading-relaxed max-w-3xl transform transition-all duration-1000 delay-600 ${
+            className={`text-xs sm:text-base md:text-xl lg:text-2xl text-gray-200 leading-relaxed max-w-xl mx-auto transform transition-all duration-1000 delay-600 ${
               isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
             {currentSlideData.description}
           </p>
 
-          {/* Action Buttons */}
+          {/* Action Buttons más grandes y centrados en mobile */}
           <div
-            className={`flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 transform transition-all duration-1000 delay-800 ${
+            className={`flex flex-col gap-3 sm:flex-row sm:gap-4 md:gap-6 justify-center items-center transform transition-all duration-1000 delay-800 ${
               isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
             <Link href="/productos">
-            <Button className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-6 text-sm sm:text-base md:text-xl font-semibold shadow-2xl shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 rounded-full relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative flex items-center justify-center">
-                Comprar Ahora
-                <ArrowRight className="ml-1.5 sm:ml-2 md:ml-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Button>
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg font-semibold shadow-2xl shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 rounded-full relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative flex items-center justify-center">
+                  Comprar Ahora
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Button>
             </Link>
-              <Link href="/productos">
-            <Button
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 px-4 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-6 text-sm sm:text-base md:text-xl backdrop-blur-sm transition-all duration-300 bg-transparent rounded-full hover:border-white/50 hover:shadow-lg hover:shadow-white/10 group"
-            >
-              <Play className="mr-1.5 sm:mr-2 md:mr-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform group-hover:scale-110" />
-              Ver Catálogo
-            </Button>
-          </Link>
+            <Link href="/productos">
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 px-6 py-3 sm:px-8 sm:py-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 bg-transparent rounded-full hover:border-white/50 hover:shadow-lg hover:shadow-white/10 group"
+              >
+                <Play className="mr-2 w-5 h-5 transition-transform group-hover:scale-110" />
+                Ver Catálogo
+              </Button>
+            </Link>
           </div>
 
-          {/* Stats with Animation - Hidden on small screens */}
+          {/* Stats solo en desktop */}
           <div
             className={`hidden md:flex items-center space-x-12 pt-8 transform transition-all duration-1000 delay-1000 ${
               isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
@@ -175,7 +176,6 @@ export default function Hero() {
               </div>
               <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Productos</div>
             </div>
-
             <div className="text-center group cursor-pointer">
               <div className="flex items-center justify-center mb-2">
                 <Users className="w-6 h-6 text-green-400 mr-2 group-hover:scale-110 transition-transform" />
@@ -183,7 +183,6 @@ export default function Hero() {
               </div>
               <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Clientes</div>
             </div>
-
             <div className="text-center group cursor-pointer">
               <div className="flex items-center justify-center mb-2">
                 <Award className="w-6 h-6 text-yellow-400 mr-2 group-hover:scale-110 transition-transform" />
@@ -195,20 +194,20 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2 sm:space-x-3">
+      {/* Slide Indicators más grandes en mobile */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-1.5 h-1.5 sm:w-2 sm:h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
+            className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 rounded-full transition-all duration-300 ${
               index === currentSlide ? "bg-white shadow-lg shadow-white/50" : "bg-white/30 hover:bg-white/50"
             }`}
           />
         ))}
       </div>
 
-      {/* Scroll Indicator - Hidden on small screens */}
+      {/* Scroll Indicator solo en desktop */}
       <div className="absolute bottom-8 right-8 animate-bounce hidden md:block">
         <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
           <div className="w-1 h-3 bg-white/50 rounded-full mt-2 animate-pulse"></div>
