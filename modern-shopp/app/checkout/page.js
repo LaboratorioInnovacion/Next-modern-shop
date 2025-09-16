@@ -13,6 +13,7 @@ import Link from "next/link"
 
 export default function CheckoutPage() {
   const router = useRouter()
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
   const { items, getTotalPrice, getTotalItems, clearCart } = useCart()
   const { user, isAuthenticated } = useAuth()
   const {
@@ -48,14 +49,7 @@ export default function CheckoutPage() {
     cardName: "",
   })
 
-  // Mostrar modal de login si no está autenticado
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-
-  useEffect(() => {
-    if (items.length > 0 && !isAuthenticated) {
-      setShowLoginPrompt(true)
-    }
-  }, [items, isAuthenticated])
+  // Ya no se requiere login para checkout
 
   // Redirigir si no hay items en el carrito
   useEffect(() => {
@@ -1185,15 +1179,15 @@ export default function CheckoutPage() {
 //   ]
 
 //   return (
-//     <div className="container mx-auto px-4 py-8">
+//     <div className="container mx-auto px-2 py-4 sm:px-4 sm:py-8">
 //       {/* Header */}
-//       <div className="flex items-center justify-between mb-8">
+//       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
 //         <div>
-//           <h1 className="text-3xl font-bold mb-2">Checkout</h1>
-//           <p className="text-gray-400">Completa tu pedido de {getTotalItems()} productos</p>
+//           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Checkout</h1>
+//           <p className="text-gray-400 text-sm sm:text-base">Completa tu pedido de {getTotalItems()} productos</p>
 //         </div>
 //         <Link href="/carrito">
-//           <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-800 bg-transparent">
+//           <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-800 bg-transparent w-full sm:w-auto">
 //             <ArrowLeft className="w-4 h-4 mr-2" />
 //             Volver al Carrito
 //           </Button>
@@ -1201,27 +1195,27 @@ export default function CheckoutPage() {
 //       </div>
 
 //       {/* Progress Steps */}
-//       <div className="mb-8">
-//         <div className="flex items-center justify-between">
+//       <div className="mb-6 sm:mb-8">
+//         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 //           {steps.map((step, index) => (
-//             <div key={step.number} className="flex items-center">
+//             <div key={step.number} className="flex items-center w-full sm:w-auto">
 //               <div
-//                 className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
+//                 className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 ${
 //                   currentStep >= step.number
 //                     ? "bg-blue-500 border-blue-500 text-white"
 //                     : "border-slate-600 text-gray-400"
 //                 }`}
 //               >
-//                 {currentStep > step.number ? <Check className="w-6 h-6" /> : step.icon}
+//                 {currentStep > step.number ? <Check className="w-5 h-5 sm:w-6 sm:h-6" /> : step.icon}
 //               </div>
-//               <div className="ml-4">
-//                 <div className={`font-medium ${currentStep >= step.number ? "text-white" : "text-gray-400"}`}>
+//               <div className="ml-2 sm:ml-4">
+//                 <div className={`font-medium text-xs sm:text-base ${currentStep >= step.number ? "text-white" : "text-gray-400"}`}>
 //                   {step.title}
 //                 </div>
 //               </div>
 //               {index < steps.length - 1 && (
 //                 <div
-//                   className={`flex-1 h-0.5 mx-8 ${currentStep > step.number ? "bg-blue-500" : "bg-slate-600"}`}
+//                   className={`hidden sm:flex flex-1 h-0.5 mx-8 ${currentStep > step.number ? "bg-blue-500" : "bg-slate-600"}`}
 //                 ></div>
 //               )}
 //             </div>
@@ -1229,14 +1223,14 @@ export default function CheckoutPage() {
 //         </div>
 //       </div>
 
-//       <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+//       <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3 lg:gap-8">
 //         {/* Formulario Principal */}
-//         <div className="lg:col-span-2">
+//         <div className="w-full lg:col-span-2">
 //           {/* Paso 1: Información de Envío */}
 //           {currentStep === 1 && (
 //             <Card className="bg-slate-800 border-slate-700">
 //               <CardHeader>
-//                 <CardTitle className="flex items-center text-lg sm:text-xl">
+//                 <CardTitle className="flex items-center text-base sm:text-lg md:text-xl">
 //                   <Truck className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
 //                   Información de Envío
 //                 </CardTitle>
@@ -1244,22 +1238,22 @@ export default function CheckoutPage() {
 //               <CardContent className="space-y-4">
 //                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Nombre *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Nombre *</label>
 //                     <Input
 //                       name="firstName"
 //                       value={formData.firstName}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="Tu nombre"
 //                     />
 //                   </div>
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Apellidos *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Apellidos *</label>
 //                     <Input
 //                       name="lastName"
 //                       value={formData.lastName}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="Tus apellidos"
 //                     />
 //                   </div>
@@ -1267,73 +1261,73 @@ export default function CheckoutPage() {
 
 //                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Email *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Email *</label>
 //                     <Input
 //                       name="email"
 //                       type="email"
 //                       value={formData.email}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="tu@email.com"
 //                     />
 //                   </div>
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Teléfono *</label>
 //                     <Input
 //                       name="phone"
 //                       value={formData.phone}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="+34 600 000 000"
 //                     />
 //                   </div>
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-sm font-medium text-gray-300 mb-2">Dirección *</label>
+//                   <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Dirección *</label>
 //                   <Input
 //                     name="address"
 //                     value={formData.address}
 //                     onChange={handleInputChange}
-//                     className="bg-slate-700 border-slate-600 text-white"
+//                     className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                     placeholder="Calle, número, piso, puerta"
 //                   />
 //                 </div>
 
 //                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Ciudad *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Ciudad *</label>
 //                     <Input
 //                       name="city"
 //                       value={formData.city}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="Madrid"
 //                     />
 //                   </div>
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Provincia</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Provincia</label>
 //                     <Input
 //                       name="state"
 //                       value={formData.state}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="Madrid"
 //                     />
 //                   </div>
 //                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Código Postal *</label>
+//                     <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Código Postal *</label>
 //                     <Input
 //                       name="zipCode"
 //                       value={formData.zipCode}
 //                       onChange={handleInputChange}
-//                       className="bg-slate-700 border-slate-600 text-white"
+//                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                       placeholder="28001"
 //                     />
 //                   </div>
 //                 </div>
 
-//                 <div className="flex flex-col sm:flex-row justify-end pt-4 gap-3">
+//                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-end pt-4">
 //                   <Button
 //                     onClick={() => handleStepComplete(1)}
 //                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 w-full sm:w-auto"
@@ -1350,7 +1344,7 @@ export default function CheckoutPage() {
 //           {currentStep === 2 && (
 //             <Card className="bg-slate-800 border-slate-700">
 //               <CardHeader>
-//                 <CardTitle className="flex items-center text-lg sm:text-xl">
+//                 <CardTitle className="flex items-center text-base sm:text-lg md:text-xl">
 //                   <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
 //                   Método de Pago
 //                 </CardTitle>
@@ -1374,7 +1368,7 @@ export default function CheckoutPage() {
 //                         }`}
 //                       ></div>
 //                       <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-//                       <span className="font-medium text-sm sm:text-base">Tarjeta de Crédito/Débito</span>
+//                       <span className="font-medium text-xs sm:text-base">Tarjeta de Crédito/Débito</span>
 //                     </div>
 //                   </div>
 
@@ -1394,7 +1388,7 @@ export default function CheckoutPage() {
 //                         }`}
 //                       ></div>
 //                       <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-//                       <span className="font-medium text-sm sm:text-base">PayPal</span>
+//                       <span className="font-medium text-xs sm:text-base">PayPal</span>
 //                     </div>
 //                   </div>
 
@@ -1414,7 +1408,7 @@ export default function CheckoutPage() {
 //                         }`}
 //                       ></div>
 //                       <img src="/mercadopago.svg" alt="MercadoPago" className="w-6 h-6 mr-2" />
-//                       <span className="font-medium text-sm sm:text-base">MercadoPago</span>
+//                       <span className="font-medium text-xs sm:text-base">MercadoPago</span>
 //                     </div>
 //                   </div>
 
@@ -1434,7 +1428,7 @@ export default function CheckoutPage() {
 //                         }`}
 //                       ></div>
 //                       <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-//                       <span className="font-medium text-sm sm:text-base">Transferencia Bancaria</span>
+//                       <span className="font-medium text-xs sm:text-base">Transferencia Bancaria</span>
 //                     </div>
 //                   </div>
 //                 </div>
@@ -1443,47 +1437,47 @@ export default function CheckoutPage() {
 //                 {paymentMethod === "card" && (
 //                   <div className="space-y-4 pt-4 border-t border-slate-600">
 //                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Nombre en la Tarjeta *</label>
+//                       <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Nombre en la Tarjeta *</label>
 //                       <Input
 //                         name="cardName"
 //                         value={formData.cardName}
 //                         onChange={handleInputChange}
-//                         className="bg-slate-700 border-slate-600 text-white"
+//                         className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                         placeholder="Nombre como aparece en la tarjeta"
 //                       />
 //                     </div>
 
 //                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Número de Tarjeta *</label>
+//                       <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Número de Tarjeta *</label>
 //                       <Input
 //                         name="cardNumber"
 //                         value={formData.cardNumber}
 //                         onChange={handleInputChange}
-//                         className="bg-slate-700 border-slate-600 text-white"
+//                         className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                         placeholder="1234 5678 9012 3456"
 //                         maxLength={19}
 //                       />
 //                     </div>
 
-//                     <div className="grid grid-cols-2 gap-4">
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 //                       <div>
-//                         <label className="block text-sm font-medium text-gray-300 mb-2">Fecha de Vencimiento *</label>
+//                         <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Fecha de Vencimiento *</label>
 //                         <Input
 //                           name="expiryDate"
 //                           value={formData.expiryDate}
 //                           onChange={handleInputChange}
-//                           className="bg-slate-700 border-slate-600 text-white"
+//                           className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                           placeholder="MM/AA"
 //                           maxLength={5}
 //                         />
 //                       </div>
 //                       <div>
-//                         <label className="block text-sm font-medium text-gray-300 mb-2">CVV *</label>
+//                         <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">CVV *</label>
 //                         <Input
 //                           name="cvv"
 //                           value={formData.cvv}
 //                           onChange={handleInputChange}
-//                           className="bg-slate-700 border-slate-600 text-white"
+//                           className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
 //                           placeholder="123"
 //                           maxLength={4}
 //                         />
@@ -1492,7 +1486,7 @@ export default function CheckoutPage() {
 //                   </div>
 //                 )}
 
-//                 <div className="flex flex-col sm:flex-row justify-between pt-4 gap-3">
+//                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between pt-4">
 //                   <Button
 //                     variant="outline"
 //                     onClick={() => setStep(1)}
@@ -1684,4 +1678,3 @@ export default function CheckoutPage() {
 //     </div>
 //   )
 // }
-

@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useReducer } from 'react';
+import { useAuth } from './auth-context';
 import { calculateCartTotals } from '@/lib/utils';
 
 const CartContext = createContext();
@@ -54,6 +55,7 @@ const cartReducer = (state, action) => {
 };
 
 export function CartProvider({ children }) {
+  const { isAuthenticated, user } = useAuth();
   const [state, dispatch] = useReducer(cartReducer, {
     items: []
   });
@@ -63,27 +65,29 @@ export function CartProvider({ children }) {
   useEffect(() => {
     const loadCart = async () => {
       try {
-        // Intenta cargar desde la API (si está autenticado)
-        const res = await fetch('/api/cart');
-        if (res.ok) {
-          const items = await res.json();
-          if (Array.isArray(items) && items.length > 0) {
-            const productsRes = await fetch('/api/products');
-            const products = await productsRes.json();
-            const loaded = items.map(item => {
-              const prod = products.find(p => p.id === item.productId);
-              return prod ? { ...prod, quantity: item.quantity } : null;
-            }).filter(Boolean);
-            // Sobrescribe el carrito local con el de la API
-            dispatch({ type: 'LOAD_CART', payload: loaded });
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('modernshop-cart', JSON.stringify(loaded));
+        if (isAuthenticated) {
+          // Usuario logueado: cargar desde la API
+          const res = await fetch('/api/cart');
+          if (res.ok) {
+            const items = await res.json();
+            if (Array.isArray(items) && items.length > 0) {
+              const productsRes = await fetch('/api/products');
+              const products = await productsRes.json();
+              const loaded = items.map(item => {
+                const prod = products.find(p => p.id === item.productId);
+                return prod ? { ...prod, quantity: item.quantity } : null;
+              }).filter(Boolean);
+              dispatch({ type: 'LOAD_CART', payload: loaded });
+              // Sincroniza localStorage con el carrito del usuario
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('modernshop-cart', JSON.stringify(loaded));
+              }
+              return;
             }
-            return;
           }
         }
-        // Si no hay datos de la API, usa localStorage
-        if (typeof window !== 'undefined') {
+        // Usuario no logueado: cargar desde localStorage
+        if (!isAuthenticated && typeof window !== 'undefined') {
           const savedCart = localStorage.getItem('modernshop-cart');
           if (savedCart) {
             try {
@@ -97,55 +101,66 @@ export function CartProvider({ children }) {
       }
     };
     loadCart();
-  }, []);
+  }, [isAuthenticated]);
 
   // Guardar carrito en localStorage cada vez que cambie
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (!isAuthenticated && typeof window !== 'undefined') {
       localStorage.setItem('modernshop-cart', JSON.stringify(state.items));
     }
-  }, [state.items]);
+  }, [state.items, isAuthenticated]);
 
   const addToCart = async (product, quantity = 1) => {
-    try {
-      const res = await fetch('/api/cart', {
-        method: 'POST',
-        body: JSON.stringify({ productId: product.id, quantity })
-      });
-      if (res.ok) {
-        // Actualiza el estado local con el producto completo y cantidad
-        dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
+    if (isAuthenticated) {
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'POST',
+          body: JSON.stringify({ productId: product.id, quantity })
+        });
+        if (res.ok) {
+          dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
+        }
+      } catch (err) {
+        console.error('Error adding to cart:', err);
       }
-    } catch (err) {
-      console.error('Error adding to cart:', err);
+    } else {
+      // No logueado: solo actualiza el estado y localStorage
+      dispatch({ type: 'ADD_TO_CART', payload: { ...product, quantity } });
     }
   };
 
   const removeFromCart = async (cartItemId) => {
-    try {
-      const res = await fetch('/api/cart', {
-        method: 'DELETE',
-        body: JSON.stringify({ productId: cartItemId })
-      });
-
-      if (res.ok) {
-        dispatch({ type: 'REMOVE_FROM_CART', payload: cartItemId });
+    if (isAuthenticated) {
+      try {
+        const res = await fetch('/api/cart', {
+          method: 'DELETE',
+          body: JSON.stringify({ productId: cartItemId })
+        });
+        if (res.ok) {
+          dispatch({ type: 'REMOVE_FROM_CART', payload: cartItemId });
+        }
+      } catch (err) {
+        console.error('Error removing from cart:', err);
       }
-    } catch (err) {
-      console.error('Error removing from cart:', err);
+    } else {
+      dispatch({ type: 'REMOVE_FROM_CART', payload: cartItemId });
     }
   };
 
   const clearCart = async () => {
-    try {
-      await fetch('/api/cart', {
-        method: 'DELETE',
-        body: JSON.stringify({ clearAll: true }) // puedes adaptar el body según tu API
-      });
-    } catch (err) {
-      console.error('Error clearing cart in backend:', err);
+    if (isAuthenticated) {
+      try {
+        await fetch('/api/cart', {
+          method: 'DELETE',
+          body: JSON.stringify({ clearAll: true })
+        });
+      } catch (err) {
+        console.error('Error clearing cart in backend:', err);
+      }
+      dispatch({ type: 'CLEAR_CART' });
+    } else {
+      dispatch({ type: 'CLEAR_CART' });
     }
-    dispatch({ type: 'CLEAR_CART' });
   };
 
   const getTotalItems = () => state.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -154,14 +169,18 @@ export function CartProvider({ children }) {
   // ---
   // Mover updateQuantity aquí para que esté definida antes del return
   const updateQuantity = async (productId, quantity) => {
-    try {
-      await fetch('/api/cart', {
-        method: 'POST',
-        body: JSON.stringify({ productId, quantity })
-      });
+    if (isAuthenticated) {
+      try {
+        await fetch('/api/cart', {
+          method: 'POST',
+          body: JSON.stringify({ productId, quantity })
+        });
+        dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
+      } catch (err) {
+        console.error('Error updating quantity:', err);
+      }
+    } else {
       dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
-    } catch (err) {
-      console.error('Error updating quantity:', err);
     }
   };
 
