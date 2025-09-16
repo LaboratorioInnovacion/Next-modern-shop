@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/auth-context"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-export default function MobileMenu({ isOpen, onClose }) {
+export default function MobileMenu({ isOpen, onClose,onShowAuthModal }) {
   const { user, isAuthenticated, logout } = useAuth()
   const pathname = usePathname()
   const [animateIn, setAnimateIn] = useState(false)
@@ -139,13 +139,19 @@ export default function MobileMenu({ isOpen, onClose }) {
                   variant="outline"
                   className="w-full border-slate-700 text-white bg-transparent"
                   onClick={() => {
-                    if (onShowAuthModal) onShowAuthModal();
+                    if (onShowAuthModal) onShowAuthModal('login');
                     onClose();
                   }}
                 >
                   Iniciar Sesión
                 </Button>
-                <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white" onClick={onClose}>
+                <Button
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  onClick={() => {
+                    if (onShowAuthModal) onShowAuthModal('register');
+                    onClose();
+                  }}
+                >
                   Registrarse
                 </Button>
               </div>
