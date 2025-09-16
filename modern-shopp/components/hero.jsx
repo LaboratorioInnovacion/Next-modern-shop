@@ -1,12 +1,14 @@
 "use client"
 
 import { ArrowRight, Play, Sparkles, TrendingUp, Users, Award } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 
 export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
+  const [particles, setParticles] = useState([])
 
   const slides = [
     {
@@ -37,6 +39,15 @@ export default function Hero() {
 
   useEffect(() => {
     setIsVisible(true)
+    // Generar partículas solo en el cliente
+    const generatedParticles = Array.from({ length: 20 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 3}s`,
+      animationDuration: `${2 + Math.random() * 3}s`,
+    }))
+    setParticles(generatedParticles)
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length)
     }, 6000)
@@ -70,15 +81,15 @@ export default function Hero() {
 
       {/* Animated Particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((p, i) => (
           <div
             key={i}
             className="absolute w-2 h-2 bg-white/10 rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
+              left: p.left,
+              top: p.top,
+              animationDelay: p.animationDelay,
+              animationDuration: p.animationDuration,
             }}
           />
         ))}
@@ -131,6 +142,7 @@ export default function Hero() {
               isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
             }`}
           >
+            <Link href="/productos">
             <Button className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-6 text-sm sm:text-base md:text-xl font-semibold shadow-2xl shadow-blue-500/25 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 rounded-full relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative flex items-center justify-center">
@@ -138,7 +150,8 @@ export default function Hero() {
                 <ArrowRight className="ml-1.5 sm:ml-2 md:ml-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform group-hover:translate-x-1" />
               </span>
             </Button>
-
+            </Link>
+              <Link href="/productos">
             <Button
               variant="outline"
               className="border-white/30 text-white hover:bg-white/10 px-4 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-6 text-sm sm:text-base md:text-xl backdrop-blur-sm transition-all duration-300 bg-transparent rounded-full hover:border-white/50 hover:shadow-lg hover:shadow-white/10 group"
@@ -146,6 +159,7 @@ export default function Hero() {
               <Play className="mr-1.5 sm:mr-2 md:mr-3 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-transform group-hover:scale-110" />
               Ver Catálogo
             </Button>
+          </Link>
           </div>
 
           {/* Stats with Animation - Hidden on small screens */}
