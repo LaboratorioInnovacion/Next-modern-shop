@@ -44,7 +44,13 @@ export function AuthProvider({ children }) {
     if (status === "loading") {
       dispatch({ type: "SET_LOADING" })
     } else if (status === "authenticated") {
-      dispatch({ type: "SET_USER", payload: session.user })
+      // Asegurarse de que el rol esté presente en session.user
+      const userWithRole = {
+        ...session.user,
+        role: session.user.role || "USER"
+      }
+      console.log("User role:", userWithRole.role) // Debugging line
+      dispatch({ type: "SET_USER", payload: userWithRole })
     } else {
       dispatch({ type: "SET_USER", payload: null })
     }
@@ -102,6 +108,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: state.isAuthenticated,
     loading: state.loading,
     error: state.error,
+    role: state.user?.role || "USER",
+    isAdmin: state.user?.role === "ADMIN",
     login,
     register,
     logout,

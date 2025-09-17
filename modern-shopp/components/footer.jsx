@@ -48,11 +48,11 @@ export default function Footer() {
               <div className="space-y-3 text-sm text-gray-400">
                 <div className="flex items-center space-x-3.5">
                   <MapPin className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>123 Commerce Street, Ciudad, País</span>
+                  <span> Catamarca, Argentina</span>
                 </div>
                 <div className="flex items-center space-x-3.5">
                   <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+54 (383) 4610888</span>
                 </div>
                 <div className="flex items-center space-x-3.5">
                   <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />

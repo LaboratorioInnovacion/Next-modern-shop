@@ -22,7 +22,7 @@ export default function Hero() {
       title: "Descubre Tu Estilo",
       subtitle: "Perfecto",
       description:
-        "Explora nuestra colección seleccionada de productos premium con ofertas exclusivas. Calidad garantizada y envío gratuito en pedidos superiores a $50.",
+        "Explora nuestra colección seleccionada de productos premium con ofertas exclusivas. Calidad garantizada y envío gratuito en pedidos superiores a $100.000.",
       image:
         "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1400&h=700&fit=crop",
       gradient: "from-blue-600/80 via-purple-600/60 to-pink-600/40",

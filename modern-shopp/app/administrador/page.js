@@ -285,7 +285,7 @@ function ProductsTable({ products, onEdit, onDelete }) {
 }
 
 export default function AdminPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin } = useAuth();
   const { showToast } = useToast ? useToast() : { showToast: () => {} };
   const [activeTab, setActiveTab] = useState('products');
   const [stats, setStats] = useState({ users: 0, products: 0, orders: 0, sales: 0 });
@@ -300,6 +300,7 @@ export default function AdminPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    console.log(isAdmin, isAuthenticated, user);
     async function fetchAll() {
       try {
         const [productsRes, usersRes, ordersRes, couponsRes, addressesRes] = await Promise.all([
@@ -451,8 +452,8 @@ export default function AdminPage() {
     setLoading(false);
   };
 
-  if (!isAuthenticated) {
-    return <div className="p-8 text-center">Debes iniciar sesión como administrador.</div>;
+  if (!isAuthenticated || !isAdmin) {
+    return <div className="p-8 text-center text-red-500 font-semibold">Acceso denegado. Solo administradores pueden ver esta página.</div>;
   }
 
   return (
