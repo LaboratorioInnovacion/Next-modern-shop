@@ -68,7 +68,7 @@ export default function Hero() {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <section className="relative min-h-[65vh] sm:min-h-[80vh] md:min-h-[90vh] lg:h-screen bg-cover bg-center overflow-hidden flex items-start justify-center">
+    <section className="relative min-h-[80vh] sm:min-h-[80vh] md:min-h-[90vh] lg:h-screen bg-cover bg-center overflow-hidden flex items-start justify-center">
       {/* Background Images with Transition */}
       {slides.map((slide, index) => (
         <div
