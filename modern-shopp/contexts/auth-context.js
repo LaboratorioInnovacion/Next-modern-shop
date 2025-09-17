@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
 
   // Sync NextAuth session with context state
   useEffect(() => {
+    console.log("Session data:", session) // Debugging line
     if (status === "loading") {
       dispatch({ type: "SET_LOADING" })
     } else if (status === "authenticated") {

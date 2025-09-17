@@ -122,12 +122,12 @@ export default function Hero() {
               ✨ Nuevas ofertas disponibles
             </span>
           </div>
-
+              
           {/* Main Title con mejor tamaño en mobile */}
           <div className="space-y-0.5 sm:space-y-2 md:space-y-4">
             <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-8xl font-bold leading-tight">
               <span
-                className={`text-2xl block bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent transform transition-all duration-1000 delay-200 ${
+                className={`text-6xl block bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent transform transition-all duration-1000 delay-200 ${
                   isVisible
                     ? "translate-y-0 opacity-100"
                     : "translate-y-8 opacity-0"
