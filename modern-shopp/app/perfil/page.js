@@ -101,15 +101,37 @@ export default function PerfilPage() {
     setEditingProfile(false)
   }
 
-  const handleAddressSubmit = () => {
+  // Nuevo método para agregar/editar dirección usando API
+  const [addresses, setAddresses] = useState([])
+
+  const fetchAddresses = async () => {
+    const res = await fetch('/api/addresses')
+    const data = await res.json()
+    setAddresses(data)
+  }
+
+  useEffect(() => {
+    if (isAuthenticated) fetchAddresses()
+  }, [isAuthenticated])
+
+  const handleAddressSubmit = async () => {
     if (editingAddress) {
-      updateAddress(editingAddress, addressData)
+      // Editar dirección
+      await fetch('/api/addresses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingAddress, ...addressData })
+      })
       setEditingAddress(null)
     } else {
-      addAddress(addressData)
+      // Agregar dirección
+      await fetch('/api/addresses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(addressData)
+      })
       setShowAddAddress(false)
     }
-
     setAddressData({
       title: "",
       firstName: "",
@@ -121,6 +143,7 @@ export default function PerfilPage() {
       country: "España",
       phone: "",
     })
+    fetchAddresses()
   }
 
   const handleEditAddress = (address) => {
@@ -492,116 +515,27 @@ export default function PerfilPage() {
 
             {/* Formulario Agregar/Editar Dirección */}
             {showAddAddress && (
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle>{editingAddress ? "Editar Dirección" : "Agregar Nueva Dirección"}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Título de la Dirección</label>
-                    <Input
-                      value={addressData.title}
-                      onChange={(e) => setAddressData({ ...addressData, title: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Casa, Oficina, etc."
-                    />
+              <form onSubmit={e => { e.preventDefault(); handleAddressSubmit(); }} className="space-y-4 p-4 rounded shadow bg-white border dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Input name="title" value={addressData.title} onChange={e => setAddressData({ ...addressData, title: e.target.value })} placeholder="Título (ej: Casa, Trabajo)" required />
+                  <Input name="firstName" value={addressData.firstName} onChange={e => setAddressData({ ...addressData, firstName: e.target.value })} placeholder="Nombre" required />
+                  <Input name="lastName" value={addressData.lastName} onChange={e => setAddressData({ ...addressData, lastName: e.target.value })} placeholder="Apellido" required />
+                  <Input name="address" value={addressData.address} onChange={e => setAddressData({ ...addressData, address: e.target.value })} placeholder="Dirección" required />
+                  <Input name="city" value={addressData.city} onChange={e => setAddressData({ ...addressData, city: e.target.value })} placeholder="Ciudad" required />
+                  <Input name="state" value={addressData.state} onChange={e => setAddressData({ ...addressData, state: e.target.value })} placeholder="Provincia/Estado" required />
+                  <Input name="zipCode" value={addressData.zipCode} onChange={e => setAddressData({ ...addressData, zipCode: e.target.value })} placeholder="Código Postal" required />
+                  <Input name="country" value={addressData.country} onChange={e => setAddressData({ ...addressData, country: e.target.value })} placeholder="País" required />
+                  <Input name="phone" value={addressData.phone} onChange={e => setAddressData({ ...addressData, phone: e.target.value })} placeholder="Teléfono" required />
+                  <div className="flex items-center gap-2 mt-2">
+                    <label htmlFor="isDefault" className="text-sm">¿Dirección principal?</label>
+                    <input type="checkbox" id="isDefault" checked={addressData.isDefault} onChange={e => setAddressData({ ...addressData, isDefault: e.target.checked })} />
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
-                      <Input
-                        value={addressData.firstName}
-                        onChange={(e) => setAddressData({ ...addressData, firstName: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Apellidos</label>
-                      <Input
-                        value={addressData.lastName}
-                        onChange={(e) => setAddressData({ ...addressData, lastName: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Dirección</label>
-                    <Input
-                      value={addressData.address}
-                      onChange={(e) => setAddressData({ ...addressData, address: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="Calle, número, piso, puerta"
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Ciudad</label>
-                      <Input
-                        value={addressData.city}
-                        onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Provincia</label>
-                      <Input
-                        value={addressData.state}
-                        onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Código Postal</label>
-                      <Input
-                        value={addressData.zipCode}
-                        onChange={(e) => setAddressData({ ...addressData, zipCode: e.target.value })}
-                        className="bg-slate-700 border-slate-600 text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono</label>
-                    <Input
-                      value={addressData.phone}
-                      onChange={(e) => setAddressData({ ...addressData, phone: e.target.value })}
-                      className="bg-slate-700 border-slate-600 text-white"
-                      placeholder="+34 600 000 000"
-                    />
-                  </div>
-
-                  <div className="flex space-x-2 pt-4">
-                    <Button onClick={handleAddressSubmit} className="bg-blue-500 hover:bg-blue-600">
-                      <Check className="w-4 h-4 mr-2" />
-                      {editingAddress ? "Actualizar" : "Guardar"}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setShowAddAddress(false)
-                        setEditingAddress(null)
-                        setAddressData({
-                          title: "",
-                          firstName: "",
-                          lastName: "",
-                          address: "",
-                          city: "",
-                          state: "",
-                          zipCode: "",
-                          country: "España",
-                          phone: "",
-                        })
-                      }}
-                      className="border-slate-600"
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <Button type="submit">{editingAddress ? "Actualizar" : "Agregar"}</Button>
+                  <Button type="button" variant="outline" onClick={() => { setShowAddAddress(false); setEditingAddress(null); }}>Cancelar</Button>
+                </div>
+              </form>
             )}
           </div>
         </TabsContent>
@@ -1179,179 +1113,3 @@ export default function PerfilPage() {
 //                       onChange={(e) => setAddressData({ ...addressData, title: e.target.value })}
 //                       className="bg-slate-700 border-slate-600 text-white"
 //                       placeholder="Casa, Oficina, etc."
-//                     />
-//                   </div>
-
-//                   <div className="grid md:grid-cols-2 gap-4">
-//                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Nombre</label>
-//                       <Input
-//                         value={addressData.firstName}
-//                         onChange={(e) => setAddressData({ ...addressData, firstName: e.target.value })}
-//                         className="bg-slate-700 border-slate-600 text-white"
-//                       />
-//                     </div>
-//                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Apellidos</label>
-//                       <Input
-//                         value={addressData.lastName}
-//                         onChange={(e) => setAddressData({ ...addressData, lastName: e.target.value })}
-//                         className="bg-slate-700 border-slate-600 text-white"
-//                       />
-//                     </div>
-//                   </div>
-
-//                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Dirección</label>
-//                     <Input
-//                       value={addressData.address}
-//                       onChange={(e) => setAddressData({ ...addressData, address: e.target.value })}
-//                       className="bg-slate-700 border-slate-600 text-white"
-//                       placeholder="Calle, número, piso, puerta"
-//                     />
-//                   </div>
-
-//                   <div className="grid md:grid-cols-3 gap-4">
-//                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Ciudad</label>
-//                       <Input
-//                         value={addressData.city}
-//                         onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
-//                         className="bg-slate-700 border-slate-600 text-white"
-//                       />
-//                     </div>
-//                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Provincia</label>
-//                       <Input
-//                         value={addressData.state}
-//                         onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
-//                         className="bg-slate-700 border-slate-600 text-white"
-//                       />
-//                     </div>
-//                     <div>
-//                       <label className="block text-sm font-medium text-gray-300 mb-2">Código Postal</label>
-//                       <Input
-//                         value={addressData.zipCode}
-//                         onChange={(e) => setAddressData({ ...addressData, zipCode: e.target.value })}
-//                         className="bg-slate-700 border-slate-600 text-white"
-//                       />
-//                     </div>
-//                   </div>
-
-//                   <div>
-//                     <label className="block text-sm font-medium text-gray-300 mb-2">Teléfono</label>
-//                     <Input
-//                       value={addressData.phone}
-//                       onChange={(e) => setAddressData({ ...addressData, phone: e.target.value })}
-//                       className="bg-slate-700 border-slate-600 text-white"
-//                       placeholder="+34 600 000 000"
-//                     />
-//                   </div>
-
-//                   <div className="flex space-x-2 pt-4">
-//                     <Button onClick={handleAddressSubmit} className="bg-blue-500 hover:bg-blue-600">
-//                       <Check className="w-4 h-4 mr-2" />
-//                       {editingAddress ? "Actualizar" : "Guardar"}
-//                     </Button>
-//                     <Button
-//                       variant="outline"
-//                       onClick={() => {
-//                         setShowAddAddress(false)
-//                         setEditingAddress(null)
-//                         setAddressData({
-//                           title: "",
-//                           firstName: "",
-//                           lastName: "",
-//                           address: "",
-//                           city: "",
-//                           state: "",
-//                           zipCode: "",
-//                           country: "España",
-//                           phone: "",
-//                         })
-//                       }}
-//                       className="border-slate-600"
-//                     >
-//                       Cancelar
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             )}
-//           </div>
-//         </TabsContent>
-
-//         {/* Tab: Configuración */}
-//         <TabsContent value="configuracion">
-//           <div className="grid md:grid-cols-2 gap-8">
-//             <Card className="bg-slate-800 border-slate-700">
-//               <CardHeader>
-//                 <CardTitle>Preferencias de Notificaciones</CardTitle>
-//               </CardHeader>
-//               <CardContent className="space-y-4">
-//                 <div className="flex items-center justify-between">
-//                   <div>
-//                     <p className="font-medium text-white">Ofertas y Promociones</p>
-//                     <p className="text-gray-400 text-sm">Recibir emails sobre ofertas especiales</p>
-//                   </div>
-//                   <input type="checkbox" className="toggle" defaultChecked />
-//                 </div>
-
-//                 <div className="flex items-center justify-between">
-//                   <div>
-//                     <p className="font-medium text-white">Actualizaciones de Pedidos</p>
-//                     <p className="text-gray-400 text-sm">Notificaciones sobre el estado de tus pedidos</p>
-//                   </div>
-//                   <input type="checkbox" className="toggle" defaultChecked />
-//                 </div>
-
-//                 <div className="flex items-center justify-between">
-//                   <div>
-//                     <p className="font-medium text-white">Nuevos Productos</p>
-//                     <p className="text-gray-400 text-sm">Información sobre nuevos productos</p>
-//                   </div>
-//                   <input type="checkbox" className="toggle" />
-//                 </div>
-//               </CardContent>
-//             </Card>
-
-//             <Card className="bg-slate-800 border-slate-700">
-//               <CardHeader>
-//                 <CardTitle>Seguridad</CardTitle>
-//               </CardHeader>
-//               <CardContent className="space-y-4">
-//                 <Button
-//                   variant="outline"
-//                   className="w-full border-slate-600 text-white hover:bg-slate-700 bg-transparent"
-//                 >
-//                   Cambiar Contraseña
-//                 </Button>
-
-//                 <Button
-//                   variant="outline"
-//                   className="w-full border-slate-600 text-white hover:bg-slate-700 bg-transparent"
-//                 >
-//                   Configurar Autenticación de Dos Factores
-//                 </Button>
-
-//                 <Button
-//                   variant="outline"
-//                   className="w-full border-slate-600 text-white hover:bg-slate-700 bg-transparent"
-//                 >
-//                   Descargar Mis Datos
-//                 </Button>
-
-//                 <Button
-//                   variant="outline"
-//                   className="w-full border-red-500 text-red-400 hover:bg-red-500/10 bg-transparent"
-//                 >
-//                   Eliminar Cuenta
-//                 </Button>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </TabsContent>
-//       </Tabs>
-//     </div>
-//   )
-// }
