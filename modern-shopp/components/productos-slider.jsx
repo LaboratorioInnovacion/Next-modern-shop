@@ -64,11 +64,11 @@ export default function ProductosSlider() {
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 6 15 12 9 18" /></svg>
           </button>
           {/* Fade lateral */}
-          <div className="pointer-events-none absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-slate-900/90 to-transparent z-10" />
-          <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-slate-900/90 to-transparent z-10" />
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-4 bg-gradient-to-r from-slate-900/90 to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-slate-900/90 to-transparent z-10" />
           <div
             ref={sliderRef}
-            className="flex gap-4 overflow-x-auto pb-4 scrollbar-none snap-x snap-mandatory"
+            className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar snap-x snap-mandatory"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {products.slice(0, 16).map((product) => (
@@ -130,4 +130,24 @@ export default function ProductosSlider() {
       </div>
     </section>
   )
+}
+
+// Estilos para ocultar la scrollbar en desktop
+if (typeof window !== "undefined") {
+  const style = document.createElement("style")
+  style.innerHTML = `
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+    }
+    @media (min-width: 768px) {
+      .custom-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .custom-scrollbar {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+    }
+  `
+  document.head.appendChild(style)
 }
