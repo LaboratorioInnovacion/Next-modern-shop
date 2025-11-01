@@ -1,0 +1,138 @@
+name: 🚀 Deploy to Production Server
+
+# Se ejecuta cuando haces push a main o manualmente
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '*.md'
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Forzar despliegue completo'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  deploy:
+    name: 🔄 Deploy Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: 📂 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🚀 Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        timeout: 300s
+        script: |
+          set -e
+          
+          echo "🔄 Iniciando despliegue en $(date)"
+          
+          # Variables
+          PROJECT_DIR="${{ secrets.PROJECT_PATH }}/Next-modern-shop/modern-shopp"
+          BACKUP_DIR="/tmp/backup-$(date +%Y%m%d-%H%M%S)"
+          
+          # Ir al directorio del proyecto
+          cd $PROJECT_DIR
+          
+          # Backup de la versión actual
+          echo "📦 Creando backup..."
+          mkdir -p $BACKUP_DIR
+          docker-compose -f docker-compose.prod.yml ps > $BACKUP_DIR/containers_status.txt
+          
+          # Obtener información del commit actual antes de actualizar
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          echo "📝 Commit actual: $CURRENT_COMMIT"
+          
+          # Actualizar código
+          echo "📥 Actualizando código desde GitHub..."
+          git fetch origin main
+          git reset --hard origin/main
+          
+          # Verificar que hay cambios
+          NEW_COMMIT=$(git rev-parse HEAD)
+          echo "📝 Nuevo commit: $NEW_COMMIT"
+          
+          if [ "$CURRENT_COMMIT" = "$NEW_COMMIT" ] && [ "${{ github.event.inputs.force_deploy }}" != "true" ]; then
+            echo "ℹ️  No hay cambios nuevos, saltando despliegue"
+            exit 0
+          fi
+          
+          # Parar contenedores actuales
+          echo "⏹️  Deteniendo contenedores actuales..."
+          docker-compose -f docker-compose.prod.yml down
+          
+          # Limpiar recursos no utilizados
+          echo "🧹 Limpiando recursos Docker..."
+          docker system prune -f
+          
+          # Construir y levantar nuevos contenedores
+          echo "🏗️  Construyendo y levantando contenedores..."
+          docker-compose -f docker-compose.prod.yml up -d --build
+          
+          # Esperar a que los servicios estén listos
+          echo "⏳ Esperando a que los servicios estén listos..."
+          sleep 30
+          
+          # Verificar que los contenedores están corriendo
+          if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+            echo "✅ Contenedores corriendo correctamente"
+            
+            # Verificar que la aplicación responde
+            echo "🔍 Verificando que la aplicación responde..."
+            for i in {1..5}; do
+              if curl -f http://localhost:3000 > /dev/null 2>&1; then
+                echo "✅ Aplicación respondiendo correctamente"
+                break
+              else
+                echo "⏳ Intento $i/5: Esperando respuesta de la aplicación..."
+                sleep 10
+              fi
+            done
+            
+            # Limpiar backup si todo está bien
+            rm -rf $BACKUP_DIR
+            echo "🎉 Despliegue completado exitosamente en $(date)"
+            echo "📊 Versión desplegada: $NEW_COMMIT"
+            
+          else
+            echo "❌ Error: Los contenedores no están corriendo"
+            echo "🔄 Intentando rollback..."
+            
+            # Rollback al commit anterior
+            git reset --hard $CURRENT_COMMIT
+            docker-compose -f docker-compose.prod.yml up -d --build
+            
+            echo "⚠️  Rollback completado, versión anterior restaurada"
+            exit 1
+          fi
+    
+    - name: 📊 Get deployment info
+      if: success()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd ${{ secrets.PROJECT_PATH }}/Next-modern-shop/modern-shopp
+          echo "📊 Estado final del despliegue:"
+          echo "🐳 Contenedores:"
+          docker-compose -f docker-compose.prod.yml ps
+          echo ""
+          echo "📝 Último commit:"
+          git log -1 --oneline
+          echo ""
+          echo "🌐 Aplicación disponible en: http://${{ secrets.HOST }}:3000"
