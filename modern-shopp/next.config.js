@@ -10,6 +10,8 @@ const nextConfig = {
     domains: ["placeholder.svg", "ui-avatars.com"],
     unoptimized: true,
   },
+  // Configuración para Docker
+  output: 'standalone',
   // experimental: {
   //   appDir: true,
   // },
