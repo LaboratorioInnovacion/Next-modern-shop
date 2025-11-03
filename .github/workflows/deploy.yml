@@ -14,6 +14,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Listar archivos y carpetas antes del build
+      run: |
+        echo "Contenido de modern-shopp antes del build:"
+        cd /home/psiconervio/ecomerce/Next-modern-shop/modern-shopp
+        ls -l
+        echo "Contenido de prisma:"
+        ls -l prisma || echo "No existe carpeta prisma"
     
     - name: Verificar versión de Node en Dockerfile
       run: |
