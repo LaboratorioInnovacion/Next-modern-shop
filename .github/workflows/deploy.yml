@@ -57,7 +57,7 @@ jobs:
 
         # Levantar contenedores SIN CACHE
         echo "🏗️ Construyendo desde cero (sin cache)..."
-        docker-compose -f docker-compose.prod.yml build --no-cache
+        docker-compose -f docker-compose.prod.yml build --no-cache --pull
 
         # Mostrar versión de Node en el contenedor construido
         echo "---"
