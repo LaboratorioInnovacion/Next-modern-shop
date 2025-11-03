@@ -39,13 +39,15 @@ jobs:
         echo "⏹️ Parando contenedores..."
         docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
         
-        # Limpiar Docker
-        echo "🧹 Limpiando Docker..."
-        docker system prune -f
+        # Limpiar Docker completamente
+        echo "🧹 Limpiando Docker y cache..."
+        docker system prune -af
+        docker builder prune -af
         
-        # Levantar contenedores
-        echo "🏗️ Construyendo y levantando..."
-        docker-compose -f docker-compose.prod.yml up -d --build
+        # Levantar contenedores SIN CACHE
+        echo "🏗️ Construyendo desde cero (sin cache)..."
+        docker-compose -f docker-compose.prod.yml build --no-cache
+        docker-compose -f docker-compose.prod.yml up -d
         
         echo "✅ Despliegue completado!"
         echo "📊 Estado de contenedores:"
