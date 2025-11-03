@@ -67,11 +67,7 @@ jobs:
         echo "🏗️ Construyendo desde cero (sin cache)..."
         docker-compose -f docker-compose.prod.yml build --no-cache --pull
 
-        # Mostrar versión de Node en el contenedor construido
-        echo "---"
-        echo "Versión de Node en el contenedor nextjs:"
-        docker run --rm ecommerce_app_prod node -v || echo "No se pudo obtener versión"
-
+        echo "🚀 Levantando contenedores..."
         docker-compose -f docker-compose.prod.yml up -d
 
         echo "✅ Despliegue completado!"
