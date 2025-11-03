@@ -18,10 +18,10 @@ jobs:
     - name: Mostrar contenido de deploy.yml y Dockerfile
       run: |
         echo "Contenido actual de .github/workflows/deploy.yml:"
-        cat /home/psiconervio/ecomerce/Next-modern-shop/.github/workflows/deploy.yml
+        cat .github/workflows/deploy.yml
         echo "---"
         echo "Contenido actual de Dockerfile usado para el build:"
-        cat /home/psiconervio/ecomerce/Next-modern-shop/modern-shopp/Dockerfile
+        cat modern-shopp/Dockerfile
 
     - name: Listar archivos y carpetas antes del build
       run: |
