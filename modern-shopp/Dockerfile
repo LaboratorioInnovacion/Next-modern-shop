@@ -1,28 +1,24 @@
-# Usar una imagen base de Node.js
-FROM node:20-alpine AS base
-
-# Instalar dependencias necesarias
-RUN apk add --no-cache libc6-compat
+# Etapa de construcción
+FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apk add --no-cache libc6-compat
 
 # Copiar archivos de configuración
 COPY package*.json ./
 COPY prisma ./prisma/
 
 # Instalar dependencias
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci
 
 # Generar Prisma Client
 RUN npx prisma generate
 
-# Etapa de construcción
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-COPY prisma ./prisma/
-RUN npm ci
+# Copiar el resto del código
 COPY . .
-RUN npx prisma generate
+
+# Construir aplicación
 RUN npm run build
 
 # Etapa de producción
