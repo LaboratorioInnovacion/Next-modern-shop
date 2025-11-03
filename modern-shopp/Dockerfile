@@ -43,9 +43,6 @@ USER nextjs
 
 EXPOSE 3000
 
-
-# Script de inicio que ejecuta migraciones y luego inicia la app
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
