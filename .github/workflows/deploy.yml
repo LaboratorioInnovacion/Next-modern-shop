@@ -26,7 +26,7 @@ jobs:
     - name: Listar archivos y carpetas antes del build
       run: |
         echo "Contenido de modern-shopp antes del build:"
-        cd /home/psiconervio/ecomerce/Next-modern-shop/modern-shopp
+        cd modern-shopp
         ls -l
         echo "Contenido de prisma:"
         ls -l prisma || echo "No existe carpeta prisma"
@@ -34,10 +34,10 @@ jobs:
     - name: Verificar versión de Node en Dockerfile
       run: |
         echo "Dockerfile base (debería ser node:20-alpine):"
-        grep FROM Dockerfile || true
+        grep FROM modern-shopp/Dockerfile || true
         echo "---"
         echo "🚀 Iniciando despliegue local en $(date)"
-        cd /home/psiconervio/ecomerce/Next-modern-shop/modern-shopp
+        cd modern-shopp
 
         # Crear .env si no existe
         if [ ! -f ".env" ]; then
