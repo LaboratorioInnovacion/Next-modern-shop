@@ -9,7 +9,7 @@ jobs:
   deploy:
     name: Deploy Application
     runs-on: self-hosted
-    timeout-minutes: 15
+    timeout-minutes: 30
     
     steps:
     - name: Checkout code
@@ -62,6 +62,10 @@ jobs:
         echo "🧹 Limpiando Docker y cache..."
         docker system prune -af
         docker builder prune -af
+
+        # Pre-descargar imagen de PostgreSQL
+        echo "📥 Descargando imagen de PostgreSQL..."
+        docker pull postgres:15-alpine
 
         # Levantar contenedores SIN CACHE
         echo "🏗️ Construyendo desde cero (sin cache)..."

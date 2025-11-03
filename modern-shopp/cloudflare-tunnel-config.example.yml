@@ -1,0 +1,17 @@
+# Archivo de configuración de Cloudflare Tunnel
+# Este archivo debe estar en tu servidor Linux en: ~/.cloudflared/config.yml
+
+tunnel: <TU_TUNNEL_ID>
+credentials-file: /root/.cloudflared/<TU_TUNNEL_ID>.json
+
+ingress:
+  # Ruta principal - tu aplicación
+  - hostname: tudominio.com
+    service: http://localhost:8080
+  
+  # Subdominio para pgAdmin (opcional)
+  # - hostname: admin.tudominio.com
+  #   service: http://localhost:8080
+  
+  # Ruta por defecto (requerida)
+  - service: http_status:404
