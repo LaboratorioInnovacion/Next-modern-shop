@@ -1,4 +1,4 @@
-name: 🚀 Deploy to Production Server
+name: Deploy to Production Server
 
 on:
   push:
@@ -7,15 +7,15 @@ on:
 
 jobs:
   deploy:
-    name: 🔄 Deploy Application
+    name: Deploy Application
     runs-on: ubuntu-latest
     timeout-minutes: 15
     
     steps:
-    - name: 📂 Checkout code
+    - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: 🚀 Deploy to server
+    - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
@@ -24,19 +24,11 @@ jobs:
         port: ${{ secrets.PORT }}
         timeout: 600s
         script: |
-          echo "🔄 Iniciando despliegue en $(date)"
-          
-          # Ir al directorio del proyecto
+          echo "Iniciando despliegue en $(date)"
           cd ${{ secrets.PROJECT_PATH }}/Next-modern-shop/modern-shopp
-          
-          # Actualizar código
-          echo "📥 Actualizando código..."
           git fetch origin main
           git reset --hard origin/main
-          
-          # Crear .env si no existe
           if [ ! -f ".env" ]; then
-            echo "📝 Creando .env..."
             cat > .env << 'EOF'
           NODE_ENV=production
           DATABASE_URL=postgresql://postgres:postgres_secure_2024@postgres:5432/ecommerce
@@ -48,41 +40,11 @@ jobs:
           POSTGRES_PASSWORD=postgres_secure_2024
           EOF
           fi
-          
-          # Parar contenedores
-          echo "⏹️ Parando contenedores..."
-          docker-compose -f docker-compose.prod.yml down 2>/dev/null || docker-compose -f docker-compose.yml down 2>/dev/null || true
-          
-          # Limpiar Docker
-          echo "🧹 Limpiando Docker..."
+          docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
           docker system prune -f
-          
-          # Levantar contenedores
-          echo "🚀 Levantando contenedores..."
           if [ -f "docker-compose.prod.yml" ]; then
             docker-compose -f docker-compose.prod.yml up -d --build
           else
             docker-compose -f docker-compose.yml up -d --build
           fi
-          
-          echo "✅ Despliegue completado!"
-          echo "🌐 App disponible en: http://186.12.205.69:3000"
-    
-    - name: 📊 Get deployment info
-      if: success()
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        port: ${{ secrets.PORT }}
-        script: |
-          cd ${{ secrets.PROJECT_PATH }}/Next-modern-shop/modern-shopp
-          echo "📊 Estado final del despliegue:"
-          echo "🐳 Contenedores:"
-          docker-compose -f docker-compose.prod.yml ps 2>/dev/null || docker-compose -f docker-compose.yml ps
-          echo ""
-          echo "📝 Último commit:"
-          git log -1 --oneline
-          echo ""
-          echo "🌐 Aplicación disponible en: http://186.12.205.69:3000"
+          echo "Despliegue completado!"
