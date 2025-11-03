@@ -15,11 +15,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Deploy application locally
+    - name: Verificar versión de Node en Dockerfile
       run: |
+        echo "Dockerfile base (debería ser node:20-alpine):"
+        grep FROM Dockerfile || true
+        echo "---"
         echo "🚀 Iniciando despliegue local en $(date)"
         cd /home/psiconervio/ecomerce/Next-modern-shop/modern-shopp
-        
+
         # Crear .env si no existe
         if [ ! -f ".env" ]; then
           echo "📝 Creando .env..."
@@ -34,21 +37,27 @@ jobs:
         POSTGRES_PASSWORD=postgres_secure_2024
         EOF
         fi
-        
+
         # Parar contenedores existentes
         echo "⏹️ Parando contenedores..."
         docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
-        
+
         # Limpiar Docker completamente
         echo "🧹 Limpiando Docker y cache..."
         docker system prune -af
         docker builder prune -af
-        
+
         # Levantar contenedores SIN CACHE
         echo "🏗️ Construyendo desde cero (sin cache)..."
         docker-compose -f docker-compose.prod.yml build --no-cache
+
+        # Mostrar versión de Node en el contenedor construido
+        echo "---"
+        echo "Versión de Node en el contenedor nextjs:"
+        docker run --rm ecommerce_app_prod node -v || echo "No se pudo obtener versión"
+
         docker-compose -f docker-compose.prod.yml up -d
-        
+
         echo "✅ Despliegue completado!"
         echo "📊 Estado de contenedores:"
         docker-compose -f docker-compose.prod.yml ps
