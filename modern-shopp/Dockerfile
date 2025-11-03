@@ -1,5 +1,5 @@
 # Usar una imagen base de Node.js
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Instalar dependencias necesarias
 RUN apk add --no-cache libc6-compat
@@ -16,16 +16,17 @@ RUN npm ci --only=production && npm cache clean --force
 RUN npx prisma generate
 
 # Etapa de construcción
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
+COPY prisma ./prisma/
 RUN npm ci
 COPY . .
 RUN npx prisma generate
 RUN npm run build
 
 # Etapa de producción
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
