@@ -2,6 +2,8 @@
 
 Una aplicación de e-commerce moderna construida con Next.js 14, React 18 y Tailwind CSS.
 
+<!-- Actualizado: 9 Nov 2025 - Fix DB credentials -->
+
 ## Características
 
 - 🛒 Carrito de compras completo
