@@ -31,11 +31,11 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ecommerce
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/ecommerce
       - NEXTAUTH_URL=https://ecomerce.noaservice.org
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-MISECRETO}
       - SECRET=${SECRET:-MISECRETO}
-      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN}
+      - MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847}
       - NEXT_PUBLIC_URL=https://ecomerce.noaservice.org
     expose:
       - "3000"

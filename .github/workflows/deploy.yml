@@ -44,13 +44,13 @@ jobs:
           echo "📝 Creando .env..."
           cat > .env << 'EOF'
         NODE_ENV=production
-        DATABASE_URL=postgresql://postgres:postgres_secure_2024@postgres:5432/ecommerce
-        NEXTAUTH_URL=https://tu-dominio-cloudflare.com
-        NEXTAUTH_SECRET=mi_secreto_super_seguro_2024
-        SECRET=mi_secreto_super_seguro_2024
+        DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ecommerce
+        NEXTAUTH_URL=https://ecomerce.noaservice.org
+        NEXTAUTH_SECRET=MISECRETO
+        SECRET=MISECRETO
         MERCADOPAGO_ACCESS_TOKEN=APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847
-        NEXT_PUBLIC_URL=https://tu-dominio-cloudflare.com
-        POSTGRES_PASSWORD=postgres_secure_2024
+        NEXT_PUBLIC_URL=https://ecomerce.noaservice.org
+        POSTGRES_PASSWORD=postgres
         EOF
         fi
 
