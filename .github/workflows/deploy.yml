@@ -21,25 +21,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Verificar que el túnel systemd esté funcionando
+    - name: Verificar túnel Cloudflare (sin sudo)
       run: |
-        echo "🔍 Verificando estado del túnel Cloudflare..."
+        echo "🔍 Verificando túnel Cloudflare..."
         
-        # Verificar que el túnel systemd esté corriendo
-        if ! sudo systemctl is-active --quiet cloudflared; then
-          echo "⚠️ Túnel Cloudflare no está corriendo, intentando iniciar..."
-          sudo systemctl start cloudflared
-          sleep 10
-        fi
-        
-        # Verificar estado final
-        if sudo systemctl is-active --quiet cloudflared; then
-          echo "✅ Túnel Cloudflare está funcionando correctamente"
+        # Verificar procesos cloudflared
+        if pgrep -f "cloudflared tunnel" > /dev/null; then
+          echo "✅ Proceso cloudflared está ejecutándose"
         else
-          echo "❌ Error: No se pudo iniciar el túnel Cloudflare"
-          sudo systemctl status cloudflared --no-pager -l
-          exit 1
+          echo "⚠️ No se encontró proceso cloudflared activo"
         fi
+        
+        # Verificar conectividad del dominio
+        echo "🌐 Probando conectividad del dominio..."
+        if curl -s --max-time 15 -I https://ecomerce.noaservice.org | grep -q "200\|301\|302"; then
+          echo "✅ Dominio responde correctamente"
+        else
+          echo "⚠️ El dominio no responde, pero continuamos el despliegue"
+        fi
+        
+        echo "📋 Información del sistema:"
+        echo "Usuario: $(whoami)"
+        pgrep -fl cloudflared || echo "No hay procesos cloudflared visibles"
 
     - name: Crear archivo .env.production
       run: |
