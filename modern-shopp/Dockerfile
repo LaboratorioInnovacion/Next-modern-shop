@@ -8,8 +8,11 @@ RUN apk add --no-cache libc6-compat
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependencias
-RUN npm ci
+# Configurar npm para mejor conectividad y instalar dependencias con reintentos
+RUN npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set fetch-retries 5 && \
+    npm ci --production=false --prefer-offline --no-audit --no-fund
 
 # Generar Prisma Client
 RUN npx prisma generate

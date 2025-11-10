@@ -68,9 +68,14 @@ jobs:
         cd modern-shopp
         docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
         
-        echo "🧹 Limpiando Docker..."
-        docker system prune -af
+        echo "🧹 Limpiando Docker completamente..."
+        docker system prune -af --volumes
         docker builder prune -af
+        docker image prune -af
+        
+        echo "🔄 Reiniciando Docker daemon si es posible..."
+        sudo systemctl restart docker 2>/dev/null || echo "No se puede reiniciar Docker daemon"
+        sleep 5
 
     - name: Construir y desplegar aplicación
       run: |
@@ -81,9 +86,23 @@ jobs:
         echo "📥 Descargando imágenes base..."
         docker pull postgres:15-alpine
         
-        # Construir aplicación sin cache
+        # Construir aplicación con reintentos (manejo de errores de red)
         echo "🔨 Construyendo aplicación..."
-        docker-compose -f docker-compose.prod.yml build --no-cache --pull
+        for attempt in 1 2 3; do
+          echo "Intento $attempt de construcción..."
+          if docker-compose -f docker-compose.prod.yml build --no-cache --pull; then
+            echo "✅ Construcción exitosa en intento $attempt"
+            break
+          else
+            echo "❌ Falló intento $attempt"
+            if [ $attempt -eq 3 ]; then
+              echo "💥 Falló después de 3 intentos"
+              exit 1
+            fi
+            echo "⏳ Esperando 30 segundos antes del siguiente intento..."
+            sleep 30
+          fi
+        done
         
         # Levantar servicios
         echo "🚀 Levantando servicios..."
