@@ -37,7 +37,7 @@ jobs:
           echo "✅ Túnel Cloudflare está funcionando correctamente"
         else
           echo "❌ Error: No se pudo iniciar el túnel Cloudflare"
-          sudo systemctl status cloudflared
+          sudo systemctl status cloudflared --no-pager -l
           exit 1
         fi
 
@@ -99,6 +99,8 @@ jobs:
         # Mostrar estado de contenedores
         docker-compose -f docker-compose.prod.yml ps
         
+        # Verificar estado del túnel systemd
+        echo "🔍 Verificando estado del túnel Cloudflare..."
         # Verificar estado del túnel systemd
         echo "🔍 Verificando estado del túnel Cloudflare..."
         sudo systemctl status cloudflared --no-pager -l
