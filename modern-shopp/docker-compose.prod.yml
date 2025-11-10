@@ -61,19 +61,6 @@ services:
     networks:
       - ecommerce_network
 
-  # Cloudflare Tunnel
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: cloudflared_tunnel
-    restart: always
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    depends_on:
-      - nginx
-    networks:
-      - ecommerce_network
-
 networks:
   ecommerce_network:
     driver: bridge

@@ -1,0 +1,507 @@
+===============================================================================
+🚀 GUÍA COMPLETA: CÓMO EXPONER APLICACIONES DOCKER A TRAVÉS DE CLOUDFLARE TUNNEL
+===============================================================================
+
+📋 PREREQUISITOS:
+- Cloudflare Tunnel ya configurado y funcionando
+- Túnel ID: 02bf07cb-daba-4f0f-82cc-ca7ba537c43b
+- Túnel Name: ecommerce-nextshop
+- Aplicación actual: https://ecomerce.noaservice.org
+
+===============================================================================
+📋 PASO 1: DECIDIR LA ESTRUCTURA DE DOMINIOS
+===============================================================================
+
+OPCIÓN A - SUBDOMINIOS (Recomendado):
+✅ ecomerce.noaservice.org → Tienda actual
+✅ app2.noaservice.org → Nueva aplicación
+✅ api.noaservice.org → API
+✅ admin.noaservice.org → Panel administrativo
+
+OPCIÓN B - RUTAS (PATHS):
+✅ ecomerce.noaservice.org/ → Tienda actual
+✅ ecomerce.noaservice.org/app2/ → Nueva aplicación
+✅ ecomerce.noaservice.org/api/ → API
+
+OPCIÓN C - PUERTOS DIFERENTES:
+✅ ecomerce.noaservice.org:8082 → Nueva aplicación
+
+===============================================================================
+📋 PASO 2A: CONFIGURACIÓN CON SUBDOMINIOS
+===============================================================================
+
+1. CREAR DNS PARA NUEVO SUBDOMINIO:
+   cloudflared tunnel route dns ecommerce-nextshop app2.noaservice.org
+   cloudflared tunnel route dns ecommerce-nextshop api.noaservice.org
+
+2. ACTUALIZAR CONFIGURACIÓN DEL TÚNEL:
+   sudo nano /root/.cloudflared/config.yml
+
+   CONTENIDO DEL ARCHIVO:
+   ----------------------------------------
+   tunnel: 02bf07cb-daba-4f0f-82cc-ca7ba537c43b
+   credentials-file: /root/.cloudflared/02bf07cb-daba-4f0f-82cc-ca7ba537c43b.json
+
+   ingress:
+     # E-commerce Next.js (aplicación actual)
+     - hostname: ecomerce.noaservice.org
+       service: http://localhost:8081
+     - hostname: www.ecomerce.noaservice.org
+       service: http://localhost:8081
+       
+     # Nueva aplicación en puerto 8082
+     - hostname: app2.noaservice.org
+       service: http://localhost:8082
+       
+     # API en puerto 8083
+     - hostname: api.noaservice.org
+       service: http://localhost:8083
+       
+     # Panel admin en puerto 8084
+     - hostname: admin.noaservice.org
+       service: http://localhost:8084
+       
+     # Ruta por defecto (SIEMPRE DEBE SER LA ÚLTIMA)
+     - service: http_status:404
+   ----------------------------------------
+
+===============================================================================
+📋 PASO 2B: CONFIGURACIÓN CON RUTAS (PATHS)
+===============================================================================
+
+CONFIGURACIÓN ALTERNATIVA PARA config.yml:
+----------------------------------------
+tunnel: 02bf07cb-daba-4f0f-82cc-ca7ba537c43b
+credentials-file: /root/.cloudflared/02bf07cb-daba-4f0f-82cc-ca7ba537c43b.json
+
+ingress:
+  # Nueva aplicación en /app2
+  - hostname: ecomerce.noaservice.org
+    path: /app2/*
+    service: http://localhost:8082
+    
+  # API en /api
+  - hostname: ecomerce.noaservice.org
+    path: /api/*
+    service: http://localhost:8083
+    
+  # Admin en /admin
+  - hostname: ecomerce.noaservice.org
+    path: /admin/*
+    service: http://localhost:8084
+    
+  # E-commerce (todo lo demás)
+  - hostname: ecomerce.noaservice.org
+    service: http://localhost:8081
+  - hostname: www.ecomerce.noaservice.org
+    service: http://localhost:8081
+    
+  # Ruta por defecto
+  - service: http_status:404
+----------------------------------------
+
+===============================================================================
+📋 PASO 3: EJEMPLOS DE APLICACIONES DOCKER
+===============================================================================
+
+🔧 EJEMPLO 1: APLICACIÓN WEB SIMPLE (NGINX)
+
+1. CREAR DIRECTORIO:
+   mkdir -p /home/app2
+   cd /home/app2
+
+2. CREAR Dockerfile:
+   cat > Dockerfile << 'EOF'
+   FROM nginx:alpine
+   COPY index.html /usr/share/nginx/html/index.html
+   EXPOSE 80
+   EOF
+
+3. CREAR PÁGINA WEB:
+   cat > index.html << 'EOF'
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <title>Mi Segunda App</title>
+       <style>
+           body { font-family: Arial; margin: 50px; background: #f0f0f0; }
+           .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+           h1 { color: #333; }
+       </style>
+   </head>
+   <body>
+       <div class="container">
+           <h1>🚀 ¡Aplicación 2 Funcionando!</h1>
+           <p>Esta es mi segunda aplicación expuesta a través de Cloudflare Tunnel.</p>
+           <p><strong>Fecha:</strong> <span id="fecha"></span></p>
+           <script>
+               document.getElementById('fecha').innerText = new Date().toLocaleString();
+           </script>
+       </div>
+   </body>
+   </html>
+   EOF
+
+4. CREAR docker-compose.yml:
+   cat > docker-compose.yml << 'EOF'
+   version: '3.8'
+   services:
+     app2:
+       build: .
+       container_name: mi_app2
+       restart: always
+       ports:
+         - "8082:80"
+   EOF
+
+5. LEVANTAR APLICACIÓN:
+   docker-compose up -d --build
+
+🔧 EJEMPLO 2: API NODE.JS
+
+1. CREAR DIRECTORIO:
+   mkdir -p /home/api-node
+   cd /home/api-node
+
+2. CREAR app.js:
+   cat > app.js << 'EOF'
+   const express = require('express');
+   const app = express();
+   
+   app.use(express.json());
+   
+   // CORS para permitir requests desde cualquier origen
+   app.use((req, res, next) => {
+       res.header('Access-Control-Allow-Origin', '*');
+       res.header('Access-Control-Allow-Headers', 'Content-Type');
+       next();
+   });
+   
+   // Ruta principal
+   app.get('/', (req, res) => {
+       res.json({ 
+           message: '🚀 API funcionando correctamente!', 
+           timestamp: new Date(),
+           version: '1.0.0'
+       });
+   });
+   
+   // Health check
+   app.get('/health', (req, res) => {
+       res.json({ status: 'OK', uptime: process.uptime() });
+   });
+   
+   // Endpoint de ejemplo
+   app.get('/users', (req, res) => {
+       res.json([
+           { id: 1, name: 'Juan Pérez', email: 'juan@example.com' },
+           { id: 2, name: 'María García', email: 'maria@example.com' }
+       ]);
+   });
+   
+   app.post('/users', (req, res) => {
+       const { name, email } = req.body;
+       res.json({ 
+           message: 'Usuario creado', 
+           user: { id: Date.now(), name, email }
+       });
+   });
+   
+   const PORT = 3000;
+   app.listen(PORT, '0.0.0.0', () => {
+       console.log(`🚀 API ejecutándose en puerto ${PORT}`);
+   });
+   EOF
+
+3. CREAR package.json:
+   cat > package.json << 'EOF'
+   {
+     "name": "mi-api",
+     "version": "1.0.0",
+     "description": "API de ejemplo",
+     "main": "app.js",
+     "scripts": {
+       "start": "node app.js"
+     },
+     "dependencies": {
+       "express": "^4.18.2"
+     }
+   }
+   EOF
+
+4. CREAR docker-compose.yml:
+   cat > docker-compose.yml << 'EOF'
+   version: '3.8'
+   services:
+     api:
+       image: node:18-alpine
+       container_name: mi_api
+       working_dir: /app
+       command: sh -c "npm install && npm start"
+       volumes:
+         - .:/app
+       ports:
+         - "8083:3000"
+       restart: always
+   EOF
+
+5. LEVANTAR API:
+   docker-compose up -d
+
+🔧 EJEMPLO 3: APLICACIÓN PYTHON FLASK
+
+1. CREAR DIRECTORIO:
+   mkdir -p /home/flask-app
+   cd /home/flask-app
+
+2. CREAR app.py:
+   cat > app.py << 'EOF'
+   from flask import Flask, jsonify, render_template_string
+   import datetime
+   
+   app = Flask(__name__)
+   
+   HTML_TEMPLATE = '''
+   <!DOCTYPE html>
+   <html>
+   <head>
+       <title>Flask App</title>
+       <style>
+           body { font-family: Arial; margin: 50px; background: #e3f2fd; }
+           .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+           h1 { color: #1976d2; }
+           .api-info { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+       </style>
+   </head>
+   <body>
+       <div class="container">
+           <h1>🐍 Flask Application</h1>
+           <p><strong>Estado:</strong> ✅ Funcionando correctamente</p>
+           <p><strong>Timestamp:</strong> {{ timestamp }}</p>
+           <div class="api-info">
+               <h3>🚀 Endpoints disponibles:</h3>
+               <ul>
+                   <li><strong>GET /</strong> - Esta página</li>
+                   <li><strong>GET /api/status</strong> - Estado de la API</li>
+                   <li><strong>GET /api/time</strong> - Hora actual</li>
+               </ul>
+           </div>
+       </div>
+   </body>
+   </html>
+   '''
+   
+   @app.route('/')
+   def home():
+       return render_template_string(HTML_TEMPLATE, timestamp=datetime.datetime.now())
+   
+   @app.route('/api/status')
+   def status():
+       return jsonify({
+           'status': 'OK',
+           'message': 'Flask API funcionando',
+           'timestamp': datetime.datetime.now().isoformat()
+       })
+   
+   @app.route('/api/time')
+   def get_time():
+       return jsonify({
+           'current_time': datetime.datetime.now().isoformat(),
+           'timezone': 'UTC'
+       })
+   
+   if __name__ == '__main__':
+       app.run(host='0.0.0.0', port=5000, debug=True)
+   EOF
+
+3. CREAR requirements.txt:
+   cat > requirements.txt << 'EOF'
+   Flask==2.3.3
+   EOF
+
+4. CREAR docker-compose.yml:
+   cat > docker-compose.yml << 'EOF'
+   version: '3.8'
+   services:
+     flask-app:
+       image: python:3.9-slim
+       container_name: mi_flask_app
+       working_dir: /app
+       command: sh -c "pip install -r requirements.txt && python app.py"
+       volumes:
+         - .:/app
+       ports:
+         - "8084:5000"
+       restart: always
+   EOF
+
+5. LEVANTAR APLICACIÓN:
+   docker-compose up -d
+
+===============================================================================
+📋 PASO 4: VERIFICAR APLICACIONES LOCALMENTE
+===============================================================================
+
+ANTES DE CONFIGURAR EL TÚNEL, VERIFICA QUE FUNCIONEN:
+
+# Verificar aplicación web (puerto 8082):
+curl http://localhost:8082
+
+# Verificar API Node.js (puerto 8083):
+curl http://localhost:8083
+curl http://localhost:8083/health
+curl http://localhost:8083/users
+
+# Verificar Flask app (puerto 8084):
+curl http://localhost:8084
+curl http://localhost:8084/api/status
+
+===============================================================================
+📋 PASO 5: REINICIAR EL TÚNEL CON NUEVA CONFIGURACIÓN
+===============================================================================
+
+1. REINICIAR SERVICIO:
+   sudo systemctl restart cloudflared
+
+2. VERIFICAR LOGS:
+   sudo journalctl -u cloudflared -f --no-pager -n 20
+
+3. VERIFICAR ESTADO:
+   sudo systemctl status cloudflared
+
+===============================================================================
+📋 PASO 6: PROBAR LAS APLICACIONES PÚBLICAS
+===============================================================================
+
+🌐 CON SUBDOMINIOS:
+curl https://ecomerce.noaservice.org     # Tienda original
+curl https://app2.noaservice.org         # Nueva aplicación web
+curl https://api.noaservice.org          # API Node.js
+curl https://admin.noaservice.org        # Flask app
+
+🌐 CON RUTAS (PATHS):
+curl https://ecomerce.noaservice.org/
+curl https://ecomerce.noaservice.org/app2/
+curl https://ecomerce.noaservice.org/api/
+curl https://ecomerce.noaservice.org/admin/
+
+===============================================================================
+📋 COMANDOS ÚTILES PARA GESTIÓN
+===============================================================================
+
+🔧 GESTIÓN DEL TÚNEL:
+# Ver logs del túnel:
+sudo journalctl -u cloudflared -f
+
+# Reiniciar túnel:
+sudo systemctl restart cloudflared
+
+# Parar túnel:
+sudo systemctl stop cloudflared
+
+# Estado del túnel:
+sudo systemctl status cloudflared
+
+🔧 GESTIÓN DE CONTENEDORES:
+# Ver todos los contenedores:
+docker ps -a
+
+# Ver logs de una aplicación específica:
+docker logs mi_app2 -f
+docker logs mi_api -f
+docker logs mi_flask_app -f
+
+# Reiniciar una aplicación:
+docker restart mi_app2
+
+# Parar todas las aplicaciones:
+docker stop $(docker ps -q)
+
+🔧 INFORMACIÓN DEL TÚNEL:
+# Ver túneles disponibles:
+cloudflared tunnel list
+
+# Ver información específica:
+cloudflared tunnel info ecommerce-nextshop
+
+# Ver configuración actual:
+cat /root/.cloudflared/config.yml
+
+===============================================================================
+📋 SOLUCIÓN DE PROBLEMAS COMUNES
+===============================================================================
+
+🚨 PROBLEMA: El túnel no encuentra las aplicaciones
+SOLUCIÓN: Verificar que las aplicaciones estén ejecutándose en localhost con los puertos correctos
+
+🚨 PROBLEMA: Error 502 Bad Gateway
+SOLUCIÓN: 
+- Verificar que la aplicación esté corriendo: curl http://localhost:PUERTO
+- Verificar logs del túnel: sudo journalctl -u cloudflared -f
+
+🚨 PROBLEMA: Aplicación no responde
+SOLUCIÓN:
+- Verificar puertos: netstat -tlnp | grep :PUERTO
+- Verificar logs de Docker: docker logs NOMBRE_CONTENEDOR
+
+🚨 PROBLEMA: DNS no resuelve
+SOLUCIÓN:
+- Verificar que se creó el DNS: nslookup SUBDOMINIO.noaservice.org
+- Esperar propagación DNS (puede tomar hasta 5 minutos)
+
+===============================================================================
+📋 EJEMPLO COMPLETO DE CONFIGURACIÓN FINAL
+===============================================================================
+
+ARCHIVO: /root/.cloudflared/config.yml
+----------------------------------------
+tunnel: 02bf07cb-daba-4f0f-82cc-ca7ba537c43b
+credentials-file: /root/.cloudflared/02bf07cb-daba-4f0f-82cc-ca7ba537c43b.json
+
+ingress:
+  # E-commerce principal
+  - hostname: ecomerce.noaservice.org
+    service: http://localhost:8081
+  - hostname: www.ecomerce.noaservice.org
+    service: http://localhost:8081
+    
+  # Aplicación web adicional
+  - hostname: app2.noaservice.org
+    service: http://localhost:8082
+    
+  # API Node.js
+  - hostname: api.noaservice.org
+    service: http://localhost:8083
+    
+  # Panel administrativo Flask
+  - hostname: admin.noaservice.org
+    service: http://localhost:8084
+    
+  # Ruta por defecto
+  - service: http_status:404
+----------------------------------------
+
+APLICACIONES RESULTANTES:
+✅ https://ecomerce.noaservice.org → E-commerce Next.js
+✅ https://app2.noaservice.org → Aplicación web Nginx  
+✅ https://api.noaservice.org → API Node.js
+✅ https://admin.noaservice.org → Panel Flask
+
+===============================================================================
+📋 NOTAS IMPORTANTES
+===============================================================================
+
+⚠️  SIEMPRE verificar aplicaciones localmente antes de exponerlas
+⚠️  El orden de las reglas en ingress importa (más específicas primero)
+⚠️  La regla por defecto (service: http_status:404) debe ser la última
+⚠️  Los puertos deben estar libres y no en uso por otras aplicaciones
+⚠️  Reiniciar el túnel después de cambios en config.yml
+⚠️  Verificar logs si algo no funciona
+
+===============================================================================
+🎉 ¡LISTO! AHORA PUEDES EXPONER MÚLTIPLES APLICACIONES DOCKER 🎉
+===============================================================================
+
+Creado: 10 de noviembre de 2025
+Túnel ID: 02bf07cb-daba-4f0f-82cc-ca7ba537c43b
+Configuración: ecomerce.noaservice.org funcionando

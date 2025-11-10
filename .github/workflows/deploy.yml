@@ -12,7 +12,6 @@ jobs:
     timeout-minutes: 30
     
     env:
-      TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       SECRET: ${{ secrets.SECRET }}
@@ -22,18 +21,25 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Verificar configuración del túnel
+    - name: Verificar que el túnel systemd esté funcionando
       run: |
-        echo "🔍 Verificando configuración del túnel..."
-        cd modern-shopp
+        echo "🔍 Verificando estado del túnel Cloudflare..."
         
-        # Verificar que las variables estén disponibles
-        if [ -z "$TUNNEL_TOKEN" ]; then
-          echo "❌ TUNNEL_TOKEN no está configurado"
-          exit 1
+        # Verificar que el túnel systemd esté corriendo
+        if ! sudo systemctl is-active --quiet cloudflared; then
+          echo "⚠️ Túnel Cloudflare no está corriendo, intentando iniciar..."
+          sudo systemctl start cloudflared
+          sleep 10
         fi
         
-        echo "✅ Variables de entorno configuradas correctamente"
+        # Verificar estado final
+        if sudo systemctl is-active --quiet cloudflared; then
+          echo "✅ Túnel Cloudflare está funcionando correctamente"
+        else
+          echo "❌ Error: No se pudo iniciar el túnel Cloudflare"
+          sudo systemctl status cloudflared
+          exit 1
+        fi
 
     - name: Crear archivo .env.production
       run: |
@@ -49,7 +55,6 @@ jobs:
         MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847}
         NEXT_PUBLIC_URL=https://ecomerce.noaservice.org
         POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-        TUNNEL_TOKEN=${TUNNEL_TOKEN}
         EOF
         
         echo "✅ Archivo .env.production creado"
@@ -72,7 +77,6 @@ jobs:
         # Descargar imágenes base
         echo "📥 Descargando imágenes base..."
         docker pull postgres:15-alpine
-        docker pull cloudflare/cloudflared:latest
         
         # Construir aplicación sin cache
         echo "🔨 Construyendo aplicación..."
@@ -95,13 +99,17 @@ jobs:
         # Mostrar estado de contenedores
         docker-compose -f docker-compose.prod.yml ps
         
-        # Verificar logs del túnel
-        echo "🔍 Verificando logs del túnel Cloudflare..."
-        docker logs cloudflared_tunnel --tail 20
+        # Verificar estado del túnel systemd
+        echo "🔍 Verificando estado del túnel Cloudflare..."
+        sudo systemctl status cloudflared --no-pager -l
         
         # Verificar conectividad local
         echo "🌐 Verificando conectividad local..."
         curl -f http://localhost:8081/health || echo "⚠️ Aplicación no responde localmente"
+        
+        # Verificar conectividad pública
+        echo "🌍 Verificando conectividad pública..."
+        curl -f https://ecomerce.noaservice.org/health || echo "⚠️ Aplicación no responde públicamente"
         
         echo "✅ Verificación completada"
 
