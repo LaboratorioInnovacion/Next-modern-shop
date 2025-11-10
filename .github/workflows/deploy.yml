@@ -11,69 +11,110 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 30
     
+    env:
+      TUNNEL_TOKEN: ${{ secrets.TUNNEL_TOKEN }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      SECRET: ${{ secrets.SECRET }}
+      MERCADOPAGO_ACCESS_TOKEN: ${{ secrets.MERCADOPAGO_ACCESS_TOKEN }}
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Mostrar contenido de deploy.yml y Dockerfile
+    - name: Verificar configuración del túnel
       run: |
-        echo "Contenido actual de .github/workflows/deploy.yml:"
-        cat .github/workflows/deploy.yml
-        echo "---"
-        echo "Contenido actual de Dockerfile usado para el build:"
-        cat modern-shopp/Dockerfile
-
-    - name: Listar archivos y carpetas antes del build
-      run: |
-        echo "Contenido de modern-shopp antes del build:"
+        echo "🔍 Verificando configuración del túnel..."
         cd modern-shopp
-        ls -l
-        echo "Contenido de prisma:"
-        ls -l prisma || echo "No existe carpeta prisma"
-    
-    - name: Verificar versión de Node en Dockerfile
-      run: |
-        echo "Dockerfile base (debería ser node:20-alpine):"
-        grep FROM modern-shopp/Dockerfile || true
-        echo "---"
-        echo "🚀 Iniciando despliegue local en $(date)"
-        cd modern-shopp
-
-        # Crear .env si no existe
-        if [ ! -f ".env" ]; then
-          echo "📝 Creando .env..."
-          cat > .env << 'EOF'
-        NODE_ENV=production
-        DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ecommerce
-        NEXTAUTH_URL=https://ecomerce.noaservice.org
-        NEXTAUTH_SECRET=MISECRETO
-        SECRET=MISECRETO
-        MERCADOPAGO_ACCESS_TOKEN=APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847
-        NEXT_PUBLIC_URL=https://ecomerce.noaservice.org
-        POSTGRES_PASSWORD=postgres
-        EOF
+        
+        # Verificar que las variables estén disponibles
+        if [ -z "$TUNNEL_TOKEN" ]; then
+          echo "❌ TUNNEL_TOKEN no está configurado"
+          exit 1
         fi
+        
+        echo "✅ Variables de entorno configuradas correctamente"
 
-        # Parar contenedores existentes
-        echo "⏹️ Parando contenedores..."
+    - name: Crear archivo .env.production
+      run: |
+        echo "📝 Creando .env.production..."
+        cd modern-shopp
+        
+        cat > .env.production << EOF
+        NODE_ENV=production
+        DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/ecommerce
+        NEXTAUTH_URL=https://ecomerce.noaservice.org
+        NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-MISECRETO}
+        SECRET=${SECRET:-MISECRETO}
+        MERCADOPAGO_ACCESS_TOKEN=${MERCADOPAGO_ACCESS_TOKEN:-APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847}
+        NEXT_PUBLIC_URL=https://ecomerce.noaservice.org
+        POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+        TUNNEL_TOKEN=${TUNNEL_TOKEN}
+        EOF
+        
+        echo "✅ Archivo .env.production creado"
+
+    - name: Parar servicios existentes
+      run: |
+        echo "⏹️ Parando contenedores existentes..."
+        cd modern-shopp
         docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
-
-        # Limpiar Docker completamente
-        echo "🧹 Limpiando Docker y cache..."
+        
+        echo "🧹 Limpiando Docker..."
         docker system prune -af
         docker builder prune -af
 
-        # Pre-descargar imagen de PostgreSQL
-        echo "📥 Descargando imagen de PostgreSQL..."
+    - name: Construir y desplegar aplicación
+      run: |
+        echo "🏗️ Iniciando construcción y despliegue..."
+        cd modern-shopp
+        
+        # Descargar imágenes base
+        echo "📥 Descargando imágenes base..."
         docker pull postgres:15-alpine
-
-        # Levantar contenedores SIN CACHE
-        echo "🏗️ Construyendo desde cero (sin cache)..."
+        docker pull cloudflare/cloudflared:latest
+        
+        # Construir aplicación sin cache
+        echo "🔨 Construyendo aplicación..."
         docker-compose -f docker-compose.prod.yml build --no-cache --pull
-
-        echo "🚀 Levantando contenedores..."
+        
+        # Levantar servicios
+        echo "🚀 Levantando servicios..."
         docker-compose -f docker-compose.prod.yml up -d
-
+        
         echo "✅ Despliegue completado!"
-        echo "📊 Estado de contenedores:"
+
+    - name: Verificar estado del despliegue
+      run: |
+        echo "📊 Verificando estado de contenedores..."
+        cd modern-shopp
+        
+        # Esperar un poco para que se inicien
+        sleep 30
+        
+        # Mostrar estado de contenedores
         docker-compose -f docker-compose.prod.yml ps
+        
+        # Verificar logs del túnel
+        echo "🔍 Verificando logs del túnel Cloudflare..."
+        docker logs cloudflared_tunnel --tail 20
+        
+        # Verificar conectividad local
+        echo "🌐 Verificando conectividad local..."
+        curl -f http://localhost:8081/health || echo "⚠️ Aplicación no responde localmente"
+        
+        echo "✅ Verificación completada"
+
+    - name: Mostrar información de despliegue
+      run: |
+        echo "🎉 Despliegue completado exitosamente!"
+        echo ""
+        echo "� Información del despliegue:"
+        echo "  🌐 URL pública: https://ecomerce.noaservice.org"
+        echo "  🐳 Contenedores activos:"
+        cd modern-shopp
+        docker-compose -f docker-compose.prod.yml ps --format table
+        echo ""
+        echo "📊 Para monitorear:"
+        echo "  Ver logs: docker-compose -f docker-compose.prod.yml logs -f"
+        echo "  Estado: docker-compose -f docker-compose.prod.yml ps"
