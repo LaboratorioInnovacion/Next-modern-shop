@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Package, Truck, Mail, ArrowRight, Download } from "lucide-react"
 import Link from "next/link"
+import InvoiceDownloadButton from "./InvoiceDownloadButton"
 
 export default function ConfirmacionPage() {
   const searchParams = useSearchParams()
@@ -171,10 +172,7 @@ export default function ConfirmacionPage() {
 
         {/* Acciones */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-700 bg-transparent">
-            <Download className="w-4 h-4 mr-2" />
-            Descargar Factura
-          </Button>
+          {/* <InvoiceDownloadButton orderDetails={orderDetails} /> */}
 
           <Link href="/productos">
             <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">

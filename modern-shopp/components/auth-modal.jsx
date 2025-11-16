@@ -1,22 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
-  const { login, register, loading, error, clearError } = useAuth();
+  const searchParams = useSearchParams();
+  const { login, register, loading, error, clearError, isAuthenticated } = useAuth();
   const [mode, setMode] = useState(defaultMode);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+      // Detecta error de conflicto de cuenta por Google
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const accountConflict = searchParams?.get("error") === "account_conflict";
+
+  // Cierra el modal automáticamente al autenticarse
+  useEffect(() => {
+    if (isAuthenticated && isOpen) {
+      onClose();
+      setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+    }
+  }, [isAuthenticated, isOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -171,9 +184,13 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
               </div>
             )}
 
-            {error && (
+            {(error || accountConflict) && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                <p className="text-red-400 text-sm">{error}</p>
+                <p className="text-red-400 text-sm">
+                  {accountConflict
+                    ? "Ya existe una cuenta con este email, pero no está vinculada a Google. Inicia sesión con tu email y contraseña, o contacta soporte."
+                    : error}
+                </p>
               </div>
             )}
 
@@ -197,6 +214,19 @@ export default function AuthModal({ isOpen, onClose, defaultMode = "login" }) {
                 "Crear Cuenta"
               )}
             </Button>
+
+            {/* Botón Google */}
+            {mode === "login" && (
+              <Button
+                type="button"
+                className="w-full bg-white text-black flex items-center justify-center gap-2 mt-2 border border-slate-300 hover:bg-gray-100"
+                onClick={() => signIn("google")}
+                disabled={loading}
+              >
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                Iniciar sesión con Google
+              </Button>
+            )}
             <p>nuevo@example.com , 123456 </p>
             <div className="text-center">
               <p className="text-gray-400 text-sm">

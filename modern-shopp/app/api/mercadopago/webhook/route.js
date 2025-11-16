@@ -6,6 +6,7 @@
 
 
 import { NextResponse } from 'next/server';
+import { prisma } from '../../../../lib/db';
 
 
 // POST: MercadoPago envía notificaciones de eventos de pago
@@ -40,23 +41,22 @@ export async function POST(req) {
         console.log('Detalle del pago consultado:', payment);
 
         // Actualiza la orden en la base de datos según el external_reference y el status del pago
-        try {
-          const { PrismaClient } = require('@prisma/client');
-          const prisma = new PrismaClient();
-          if (payment.external_reference) {
+        if (payment.external_reference) {
+          try {
             await prisma.order.update({
               where: { externalReference: payment.external_reference },
               data: {
                 paymentStatus: payment.status,
-                trackingNumber: payment.id.toString()
-              }
+                trackingNumber: payment.id ? payment.id.toString() : undefined,
+                status: payment.status === 'approved' ? 'COMPLETED' : 'PENDING',
+              },
             });
             console.log('Orden actualizada correctamente:', payment.external_reference, payment.status);
-          } else {
-            console.warn('No se encontró external_reference en el pago, no se puede actualizar la orden.');
+          } catch (err) {
+            console.error('Error actualizando la orden en la base de datos:', err);
           }
-        } catch (err) {
-          console.error('Error actualizando la orden en la base de datos:', err);
+        } else {
+          console.warn('No se encontró external_reference en el pago, no se puede actualizar la orden.');
         }
       }
     }

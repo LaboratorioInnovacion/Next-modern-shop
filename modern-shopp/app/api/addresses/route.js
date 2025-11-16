@@ -1,7 +1,7 @@
 // POST /api/addresses - Crear dirección para usuario autenticado
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]/route';
-import { prisma } from '@/lib/db';
+import { prisma } from '../../../lib/db';
 import { NextResponse } from 'next/server';
 
 // POST para crear dirección asociada al usuario autenticado

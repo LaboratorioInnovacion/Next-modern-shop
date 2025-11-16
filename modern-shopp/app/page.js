@@ -10,8 +10,7 @@ import Newsletter from "@/components/newsletter";
 export default function Home() {
   return (
     <>
-      <Hero />
-      
+      <Hero />  
       <ProductosSlider />
       <Features />
       <FeaturedProducts />

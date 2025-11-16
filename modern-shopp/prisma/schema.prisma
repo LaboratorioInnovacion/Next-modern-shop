@@ -26,10 +26,14 @@ datasource db {
 model User {
   id        String    @id @default(cuid())
   email     String    @unique
-  password  String
+  password  String?
   name      String
   avatar    String?
+  image     String?
+  emailVerified DateTime?
   role      Role      @default(USER)
+  accounts  Account[]
+  sessions  Session[]
   addresses Address[]
   orders    Order[]
   // wishlist  Product[] @relation("Wishlist")
@@ -77,8 +81,8 @@ model Category {
 
 model Order {
   id                String       @id @default(cuid())
-  user            User         @relation(fields: [userId], references: [id])
-  userId          String
+  user            User?        @relation(fields: [userId], references: [id])
+  userId          String?
   status          String
   total           Float
   subtotal        Float
@@ -90,6 +94,7 @@ model Order {
   paymentStatus   String
   trackingNumber  String?
   externalReference String?  // <--- agrega esta línea
+  viewToken        String?   @unique
   items           OrderItem[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -159,4 +164,41 @@ model Wishlist {
 enum Role {
   USER
   ADMIN
+}
+
+// Modelos necesarios para NextAuth (OAuth / sesiones)
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@map("VerificationToken")
 }
