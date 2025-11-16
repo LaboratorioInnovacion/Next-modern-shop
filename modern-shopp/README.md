@@ -103,7 +103,7 @@ colors: {
 \`\`\`
 
 ### Componentes
-Los componentes UI están en `components/ui/` y pueden ser personalizados según tus necesidades.
+Los componentes UI están en `components/ui/` y pueden ser personalizados según tus necesidades.op
 
 ## Contribuir
 
