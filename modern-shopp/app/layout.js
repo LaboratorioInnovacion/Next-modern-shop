@@ -3,6 +3,7 @@ import ClientProviders from "@/providers/ClientProviders";
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import SupportChat from "@/components/support-chat"
+import { Suspense } from "react"
 
 export const metadata = {
   title: "ModernShop - Tu tienda online premium",
@@ -16,12 +17,14 @@ export default function RootLayout({ children }) {
     <html lang="es" className="dark">
       <body className="font-inter antialiased">
         <ClientProviders>
-          <div className="min-h-screen bg-slate-900 text-white flex flex-col">
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <SupportChat />
-          </div>
+          <Suspense fallback={<div /> }>
+            <div className="min-h-screen bg-slate-900 text-white flex flex-col">
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <SupportChat />
+            </div>
+          </Suspense>
         </ClientProviders>
       </body>
     </html>
