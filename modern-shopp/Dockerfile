@@ -37,8 +37,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 
-# Instalar Prisma Client en producción
-RUN npm install @prisma/client
+# Instalar Prisma Client en producción (evitar fallos por peer deps en el runner)
+RUN npm install --no-audit --no-fund --legacy-peer-deps @prisma/client
 RUN npx prisma generate
 
 # Cambiar permisos
