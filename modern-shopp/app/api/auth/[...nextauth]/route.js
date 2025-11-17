@@ -13,6 +13,7 @@ export const authOptions = {
   session: {
     strategy: "jwt",
   },
+  debug:true,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,

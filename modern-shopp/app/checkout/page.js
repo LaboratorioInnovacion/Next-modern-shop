@@ -1,21 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useCart } from "@/contexts/cart-context"
-import { useAuth } from "@/contexts/auth-context"
-import { useCheckout } from "@/contexts/checkout-context"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, ArrowRight, Check, CreditCard, MapPin, Package, Shield, Truck, Lock } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/contexts/cart-context";
+import { useAuth } from "@/contexts/auth-context";
+import { useCheckout } from "@/contexts/checkout-context";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CreditCard,
+  MapPin,
+  Package,
+  Shield,
+  Truck,
+  Lock,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function CheckoutPage() {
-  const router = useRouter()
-  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-  const { items, getTotalPrice, getTotalItems, clearCart } = useCart()
-  const { user, isAuthenticated } = useAuth()
+  const router = useRouter();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { items, getTotalPrice, getTotalItems, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const {
     currentStep,
     shippingInfo,
@@ -29,7 +39,7 @@ export default function CheckoutPage() {
     setBillingInfo,
     processPayment,
     resetCheckout,
-  } = useCheckout()
+  } = useCheckout();
 
   const [formData, setFormData] = useState({
     // Información de envío
@@ -38,25 +48,27 @@ export default function CheckoutPage() {
     email: "",
     phone: "",
     address: "",
-    city: "",
-    state: "",
+    altura: "",
+    provincia: "",
+    ciudad: "",
     zipCode: "",
-    country: "España",
+    country: "",
     // Información de pago
     cardNumber: "",
     expiryDate: "",
     cvv: "",
     cardName: "",
-  })
+    dni: "",
+  });
 
   // Ya no se requiere login para checkout
 
   // Redirigir si no hay items en el carrito
   useEffect(() => {
     if (items.length === 0) {
-      router.push("/carrito")
+      router.push("/carrito");
     }
-  }, [items, router])
+  }, [items, router]);
 
   // Llenar datos del usuario si está autenticado
   useEffect(() => {
@@ -66,64 +78,86 @@ export default function CheckoutPage() {
         firstName: user.name?.split(" ")[0] || "",
         lastName: user.name?.split(" ")[1] || "",
         email: user.email || "",
-      }))
+      }));
     }
-  }, [user])
+  }, [user]);
 
-  const subtotal = getTotalPrice()
+  const subtotal = getTotalPrice();
   // Si el usuario ingresa cualquier código postal, aplicar envío fijo de 9500
-  const shipping = formData.zipCode && String(formData.zipCode).trim() !== "" ? 9500 : subtotal > 50 ? 0 : 9.99
-  const tax = subtotal * 0.21 // IVA 21%
-  const total = subtotal + shipping + tax
+  const shipping =
+    formData.zipCode && String(formData.zipCode).trim() !== ""
+      ? 9500
+      : subtotal > 50
+      ? 0
+      : 9.99;
+  const tax = subtotal * 0.21; // IVA 21%
+  const total = subtotal + shipping + tax;
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleStepComplete = (step) => {
     switch (step) {
       case 1:
         // Validar información de envío
-        const requiredShippingFields = ["firstName", "lastName", "email", "phone", "address", "city", "zipCode"]
-        const isShippingValid = requiredShippingFields.every((field) => formData[field].trim() !== "")
+        const requiredShippingFields = [
+          "firstName",
+          "email",
+          "phone",
+          "address",
+          "provincia",
+          "zipCode",
+          "altura"
+        ];
+        const isShippingValid = requiredShippingFields.every((field) =>
+          (formData[field] || "").trim() !== ""
+        );
 
         if (!isShippingValid) {
-          alert("Por favor completa todos los campos requeridos")
-          return
+          alert("Por favor completa todos los campos requeridos");
+          return;
         }
 
         setShippingInfo({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          firstName: formData.firstName + " " + formData.lastName,
+          dni: formData.dni,
           email: formData.email,
           phone: formData.phone,
-          address: formData.address,
-          city: formData.city,
-          state: formData.state,
+          address: formData.address + " " + formData.altura,
+          provincia: formData.provincia,
+          ciudad: formData.ciudad,
           zipCode: formData.zipCode,
           country: formData.country,
-        })
-        setStep(2)
-        break
+        });
+        setStep(2);
+        break;
 
       case 2:
         // Validar método de pago
         if (!paymentMethod) {
-          alert("Por favor selecciona un método de pago")
-          return
+          alert("Por favor selecciona un método de pago");
+          return;
         }
 
         if (paymentMethod === "card") {
-          const requiredPaymentFields = ["cardNumber", "expiryDate", "cvv", "cardName"]
-          const isPaymentValid = requiredPaymentFields.every((field) => formData[field].trim() !== "")
+          const requiredPaymentFields = [
+            "cardNumber",
+            "expiryDate",
+            "cvv",
+            "cardName",
+          ];
+          const isPaymentValid = requiredPaymentFields.every(
+            (field) => formData[field].trim() !== ""
+          );
 
           if (!isPaymentValid) {
-            alert("Por favor completa todos los datos de la tarjeta")
-            return
+            alert("Por favor completa todos los datos de la tarjeta");
+            return;
           }
         }
 
@@ -132,16 +166,16 @@ export default function CheckoutPage() {
           expiryDate: formData.expiryDate,
           cvv: formData.cvv,
           cardName: formData.cardName,
-        })
-        setStep(3)
-        break
+        });
+        setStep(3);
+        break;
 
       case 3:
         // Procesar pago
-        handlePayment()
-        break
+        handlePayment();
+        break;
     }
-  }
+  };
 
   const handlePayment = async () => {
     if (paymentMethod === "mercadopago") {
@@ -151,13 +185,15 @@ export default function CheckoutPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            items: items.map(item => ({
+            items: items.map((item) => ({
               productId: item.id,
-              quantity: item.quantity
+              quantity: item.quantity,
             })),
             payer: {
               email: formData.email || "usuario@email.com",
-              name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim()
+              name: `${formData.firstName || ""} ${
+                formData.lastName || ""
+              }`.trim(),
             },
             shippingAddress: {
               firstName: formData.firstName,
@@ -165,10 +201,10 @@ export default function CheckoutPage() {
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
-              city: formData.city,
-              state: formData.state,
+              provincia: formData.provincia,
+              ciudad: formData.ciudad,
               zipCode: formData.zipCode,
-              country: formData.country
+              country: formData.country,
             },
             billingAddress: {
               firstName: formData.firstName,
@@ -176,12 +212,12 @@ export default function CheckoutPage() {
               email: formData.email,
               phone: formData.phone,
               address: formData.address,
-              city: formData.city,
-              state: formData.state,
+              provincia: formData.provincia,
+              ciudad: formData.ciudad,
               zipCode: formData.zipCode,
-              country: formData.country
-            }
-          })
+              country: formData.country,
+            },
+          }),
         });
         const data = await res.json();
         if (data.init_point) {
@@ -215,35 +251,35 @@ export default function CheckoutPage() {
           tax,
           shipping,
           shippingAddress: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
+            firstName: formData.firstName + " " + formData.lastName,
+            dni: formData.dni,
             email: formData.email,
             phone: formData.phone,
             address: formData.address,
-            city: formData.city,
-            state: formData.state,
+            provincia: formData.provincia,
+            ciudad: formData.ciudad,
             zipCode: formData.zipCode,
-            country: formData.country
+            country: formData.country,
           },
           billingAddress: {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
+            firstName: formData.firstName + " " + formData.lastName,
+            dni: formData.dni,
             email: formData.email,
             phone: formData.phone,
             address: formData.address,
-            city: formData.city,
-            state: formData.state,
+            provincia: formData.provincia,
+            ciudad: formData.ciudad,
             zipCode: formData.zipCode,
-            country: formData.country
+            country: formData.country,
           },
           paymentMethod,
           paymentStatus,
-          items: items.map(item => ({
+          items: items.map((item) => ({
             productId: item.id,
             quantity: item.quantity,
-            price: item.price
-          }))
-        })
+            price: item.price,
+          })),
+        }),
       });
       if (orderRes.ok) {
         const order = await orderRes.json();
@@ -267,26 +303,30 @@ export default function CheckoutPage() {
       shippingInfo,
       paymentMethod,
       billingInfo,
-    }
-    const result = await processPayment(paymentData)
+    };
+    const result = await processPayment(paymentData);
     if (result.success) {
       // Limpiar carrito y redirigir a confirmación
-      clearCart()
-      resetCheckout()
-      router.push(`/checkout/confirmacion?id=${result.transactionId}`)
+      clearCart();
+      resetCheckout();
+      router.push(`/checkout/confirmacion?id=${result.transactionId}`);
     }
-  }
+  };
 
   if (items.length === 0) {
-    return null // El useEffect redirigirá
+    return null; // El useEffect redirigirá
   }
 
   if (showLoginPrompt) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-md mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Inicia Sesión para Continuar</h1>
-          <p className="text-gray-400 mb-8">Necesitas una cuenta para proceder con el checkout</p>
+          <h1 className="text-3xl font-bold mb-4">
+            Inicia Sesión para Continuar
+          </h1>
+          <p className="text-gray-400 mb-8">
+            Necesitas una cuenta para proceder con el checkout
+          </p>
           <div className="space-y-4">
             <Button
               className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
@@ -305,14 +345,22 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   const steps = [
-    { number: 1, title: "Información de Envío", icon: <Truck className="w-5 h-5" /> },
-    { number: 2, title: "Método de Pago", icon: <CreditCard className="w-5 h-5" /> },
+    {
+      number: 1,
+      title: "Información de Envío",
+      icon: <Truck className="w-5 h-5" />,
+    },
+    {
+      number: 2,
+      title: "Método de Pago",
+      icon: <CreditCard className="w-5 h-5" />,
+    },
     { number: 3, title: "Confirmación", icon: <Check className="w-5 h-5" /> },
-  ]
+  ];
 
   return (
     <div className="container mx-auto px-2 py-4 sm:px-4 sm:py-8">
@@ -320,10 +368,15 @@ export default function CheckoutPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-2">Checkout</h1>
-          <p className="text-gray-400 text-sm sm:text-base">Completa tu pedido de {getTotalItems()} productos</p>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Completa tu pedido de {getTotalItems()} productos
+          </p>
         </div>
         <Link href="/carrito">
-          <Button variant="outline" className="border-slate-600 text-white hover:bg-slate-800 bg-transparent w-full sm:w-auto">
+          <Button
+            variant="outline"
+            className="border-slate-600 text-white hover:bg-slate-800 bg-transparent w-full sm:w-auto"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver al Carrito
           </Button>
@@ -334,7 +387,10 @@ export default function CheckoutPage() {
       <div className="mb-6 sm:mb-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center w-full sm:w-auto">
+            <div
+              key={step.number}
+              className="flex items-center w-full sm:w-auto"
+            >
               <div
                 className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 ${
                   currentStep >= step.number
@@ -342,16 +398,26 @@ export default function CheckoutPage() {
                     : "border-slate-600 text-gray-400"
                 }`}
               >
-                {currentStep > step.number ? <Check className="w-5 h-5 sm:w-6 sm:h-6" /> : step.icon}
+                {currentStep > step.number ? (
+                  <Check className="w-5 h-5 sm:w-6 sm:h-6" />
+                ) : (
+                  step.icon
+                )}
               </div>
               <div className="ml-2 sm:ml-4">
-                <div className={`font-medium text-xs sm:text-base ${currentStep >= step.number ? "text-white" : "text-gray-400"}`}>
+                <div
+                  className={`font-medium text-xs sm:text-base ${
+                    currentStep >= step.number ? "text-white" : "text-gray-400"
+                  }`}
+                >
                   {step.title}
                 </div>
               </div>
               {index < steps.length - 1 && (
                 <div
-                  className={`hidden sm:flex flex-1 h-0.5 mx-8 ${currentStep > step.number ? "bg-blue-500" : "bg-slate-600"}`}
+                  className={`hidden sm:flex flex-1 h-0.5 mx-8 ${
+                    currentStep > step.number ? "bg-blue-500" : "bg-slate-600"
+                  }`}
                 ></div>
               )}
             </div>
@@ -374,30 +440,35 @@ export default function CheckoutPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Nombre *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Nombre y Apellido*
+                    </label>
                     <Input
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleInputChange}
                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
-                      placeholder="Tu nombre"
+                      placeholder="Tu nombre y apellido"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Apellidos *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      CUIT / DNI *
+                    </label>
                     <Input
-                      name="lastName"
-                      value={formData.lastName}
+                      name="dni"
+                      value={formData.dni}
                       onChange={handleInputChange}
                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
-                      placeholder="Tus apellidos"
+                      placeholder="CUIT o DNI"
                     />
                   </div>
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Email *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Email *
+                    </label>
                     <Input
                       name="email"
                       type="email"
@@ -408,48 +479,105 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Teléfono *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Teléfono *
+                    </label>
                     <Input
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
-                      placeholder="+34 600 000 000"
+                      placeholder="341-555-1234"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Dirección *</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                    Dirección *
+                  </label>
                   <Input
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
                     className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
-                    placeholder="Calle, número, piso, puerta"
+                    placeholder="Urquiza Sur"
                   />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Altura *
+                    </label>
+                    <Input
+                      name="altura"
+                      value={formData.altura}
+                      onChange={handleInputChange}
+                      className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
+                      placeholder="1201"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Piso (opcional)
+                    </label>
+                    <Input
+                      name="Piso"
+                      value={formData.Piso}
+                      onChange={handleInputChange}
+                      className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
+                      placeholder="3"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Departamento (opcional)
+                    </label>
+                    <Input
+                      name="Departamento"
+                      value={formData.Departamento}
+                      onChange={handleInputChange}
+                      className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
+                      placeholder="Capital"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Ciudad *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Provincia *
+                    </label>
                     <Input
-                      name="city"
-                      value={formData.city}
+                      name="provincia"
+                      value={formData.provincia}
                       onChange={handleInputChange}
                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
                       placeholder="San Juan"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Código Postal *</label>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Ciudad *
+                    </label>
+                    <Input
+                      name="ciudad"
+                      value={formData.ciudad}
+                      onChange={handleInputChange}
+                      className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
+                      placeholder="San Juan"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                      Código Postal *
+                    </label>
                     <Input
                       name="zipCode"
                       value={formData.zipCode}
                       onChange={handleInputChange}
                       className="bg-slate-700 border-slate-600 text-white text-xs sm:text-sm"
-                      placeholder="28001"
+                      placeholder="J5400"
                     />
                   </div>
                 </div>
@@ -491,11 +619,15 @@ export default function CheckoutPage() {
                     <div className="flex items-center">
                       <div
                         className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                          paymentMethod === "card" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                          paymentMethod === "card"
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-slate-400"
                         }`}
                       ></div>
                       <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      <span className="font-medium text-xs sm:text-base">Tarjeta de Crédito/Débito</span>
+                      <span className="font-medium text-xs sm:text-base">
+                        Tarjeta de Crédito/Débito
+                      </span>
                     </div>
                   </div>
 
@@ -511,11 +643,15 @@ export default function CheckoutPage() {
                     <div className="flex items-center">
                       <div
                         className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                          paymentMethod === "paypal" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                          paymentMethod === "paypal"
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-slate-400"
                         }`}
                       ></div>
                       <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      <span className="font-medium text-xs sm:text-base">PayPal</span>
+                      <span className="font-medium text-xs sm:text-base">
+                        PayPal
+                      </span>
                     </div>
                   </div>
 
@@ -531,11 +667,19 @@ export default function CheckoutPage() {
                     <div className="flex items-center">
                       <div
                         className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                          paymentMethod === "mercadopago" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                          paymentMethod === "mercadopago"
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-slate-400"
                         }`}
                       ></div>
-                      <img src="/mercadopago.svg" alt="MercadoPago" className="w-6 h-6 mr-2" />
-                      <span className="font-medium text-xs sm:text-base">MercadoPago</span>
+                      <img
+                        src="/mercadopago.svg"
+                        alt="MercadoPago"
+                        className="w-6 h-6 mr-2"
+                      />
+                      <span className="font-medium text-xs sm:text-base">
+                        MercadoPago
+                      </span>
                     </div>
                   </div>
 
@@ -551,11 +695,15 @@ export default function CheckoutPage() {
                     <div className="flex items-center">
                       <div
                         className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                          paymentMethod === "transferencia" ? "border-blue-500 bg-blue-500" : "border-slate-400"
+                          paymentMethod === "transferencia"
+                            ? "border-blue-500 bg-blue-500"
+                            : "border-slate-400"
                         }`}
                       ></div>
                       <Package className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                      <span className="font-medium text-xs sm:text-base">Transferencia Bancaria</span>
+                      <span className="font-medium text-xs sm:text-base">
+                        Transferencia Bancaria
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -564,7 +712,9 @@ export default function CheckoutPage() {
                 {paymentMethod === "card" && (
                   <div className="space-y-4 pt-4 border-t border-slate-600">
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Nombre en la Tarjeta *</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                        Nombre en la Tarjeta *
+                      </label>
                       <Input
                         name="cardName"
                         value={formData.cardName}
@@ -575,7 +725,9 @@ export default function CheckoutPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Número de Tarjeta *</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                        Número de Tarjeta *
+                      </label>
                       <Input
                         name="cardNumber"
                         value={formData.cardNumber}
@@ -588,7 +740,9 @@ export default function CheckoutPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">Fecha de Vencimiento *</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                          Fecha de Vencimiento *
+                        </label>
                         <Input
                           name="expiryDate"
                           value={formData.expiryDate}
@@ -599,7 +753,9 @@ export default function CheckoutPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">CVV *</label>
+                        <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                          CVV *
+                        </label>
                         <Input
                           name="cvv"
                           value={formData.cvv}
@@ -654,11 +810,15 @@ export default function CheckoutPage() {
                     <p className="text-white text-sm sm:text-base">
                       {shippingInfo?.firstName} {shippingInfo?.lastName}
                     </p>
-                    <p className="text-gray-300 text-sm">{shippingInfo?.address}</p>
                     <p className="text-gray-300 text-sm">
-                      {shippingInfo?.city}, {shippingInfo?.zipCode}
+                      {shippingInfo?.address}
                     </p>
-                    <p className="text-gray-300 text-sm">{shippingInfo?.phone}</p>
+                    <p className="text-gray-300 text-sm">
+                      {shippingInfo?.provincia}, {shippingInfo?.zipCode}
+                    </p>
+                    <p className="text-gray-300 text-sm">
+                      {shippingInfo?.phone}
+                    </p>
                   </div>
                 </div>
 
@@ -676,9 +836,13 @@ export default function CheckoutPage() {
                     ) : paymentMethod === "paypal" ? (
                       <p className="text-white text-sm sm:text-base">PayPal</p>
                     ) : paymentMethod === "mercadopago" ? (
-                      <p className="text-white text-sm sm:text-base">MercadoPago</p>
+                      <p className="text-white text-sm sm:text-base">
+                        MercadoPago
+                      </p>
                     ) : paymentMethod === "transferencia" ? (
-                      <p className="text-white text-sm sm:text-base">Transferencia Bancaria</p>
+                      <p className="text-white text-sm sm:text-base">
+                        Transferencia Bancaria
+                      </p>
                     ) : null}
                   </div>
                 </div>
@@ -686,15 +850,32 @@ export default function CheckoutPage() {
                 {/* Instrucciones de Transferencia Bancaria en confirmación */}
                 {paymentMethod === "transferencia" && (
                   <div className="bg-yellow-900/40 border border-yellow-700 rounded-lg p-4">
-                    <h4 className="text-yellow-200 font-semibold mb-2 flex items-center"><Package className="w-4 h-4 mr-2" />Datos para Transferencia Bancaria</h4>
-                    <p className="text-yellow-200 text-sm mb-2">Por favor, realiza una transferencia bancaria a la siguiente cuenta:</p>
+                    <h4 className="text-yellow-200 font-semibold mb-2 flex items-center">
+                      <Package className="w-4 h-4 mr-2" />
+                      Datos para Transferencia Bancaria
+                    </h4>
+                    <p className="text-yellow-200 text-sm mb-2">
+                      Por favor, realiza una transferencia bancaria a la
+                      siguiente cuenta:
+                    </p>
                     <div className="bg-yellow-800/60 rounded p-3 mb-2">
-                      <p className="text-yellow-100 text-sm font-semibold">Banco: Banco Ejemplo</p>
-                      <p className="text-yellow-100 text-sm font-semibold">IBAN: ES12 3456 7890 1234 5678 9012</p>
-                      <p className="text-yellow-100 text-sm font-semibold">Titular: Tienda Online S.L.</p>
-                      <p className="text-yellow-100 text-sm font-semibold">Concepto: Tu nombre y número de pedido</p>
+                      <p className="text-yellow-100 text-sm font-semibold">
+                        Banco: Banco Ejemplo
+                      </p>
+                      <p className="text-yellow-100 text-sm font-semibold">
+                        IBAN: ES12 3456 7890 1234 5678 9012
+                      </p>
+                      <p className="text-yellow-100 text-sm font-semibold">
+                        Titular: Tienda Online S.L.
+                      </p>
+                      <p className="text-yellow-100 text-sm font-semibold">
+                        Concepto: Tu nombre y número de pedido
+                      </p>
                     </div>
-                    <p className="text-yellow-200 text-xs">Una vez recibamos el pago, procesaremos y enviaremos tu pedido. Si tienes dudas, contáctanos.</p>
+                    <p className="text-yellow-200 text-xs">
+                      Una vez recibamos el pago, procesaremos y enviaremos tu
+                      pedido. Si tienes dudas, contáctanos.
+                    </p>
                   </div>
                 )}
 
@@ -741,7 +922,9 @@ export default function CheckoutPage() {
         <div className="lg:col-span-1">
           <Card className="bg-slate-800 border-slate-700 sticky top-8">
             <CardHeader>
-              <CardTitle className="text-lg sm:text-xl">Resumen del Pedido</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">
+                Resumen del Pedido
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Items */}
@@ -754,10 +937,16 @@ export default function CheckoutPage() {
                       className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-xs sm:text-sm font-medium truncate">{item.name}</p>
-                      <p className="text-gray-400 text-xs">Cantidad: {item.quantity}</p>
+                      <p className="text-white text-xs sm:text-sm font-medium truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-gray-400 text-xs">
+                        Cantidad: {item.quantity}
+                      </p>
                     </div>
-                    <p className="text-blue-400 font-semibold text-sm">{item.price}</p>
+                    <p className="text-blue-400 font-semibold text-sm">
+                      {item.price}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -769,7 +958,9 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Envío</span>
-                  <span className="text-white">{shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}</span>
+                  <span className="text-white">
+                    {shipping === 0 ? "Gratis" : `$${shipping.toFixed(2)}`}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">IVA (21%)</span>
@@ -777,8 +968,12 @@ export default function CheckoutPage() {
                 </div>
                 <div className="border-t border-slate-600 pt-2">
                   <div className="flex justify-between">
-                    <span className="text-lg sm:text-xl font-bold text-white">Total</span>
-                    <span className="text-xl sm:text-2xl font-bold text-blue-400">${total.toFixed(2)}</span>
+                    <span className="text-lg sm:text-xl font-bold text-white">
+                      Total
+                    </span>
+                    <span className="text-xl sm:text-2xl font-bold text-blue-400">
+                      ${total.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -791,11 +986,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center text-xs sm:text-sm text-gray-300">
                   <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400 mr-2 flex-shrink-0" />
-                  <span>Envío en 24-48h</span>
+                  <span>Envio a domicilio</span>
                 </div>
                 <div className="flex items-center text-xs sm:text-sm text-gray-300">
                   <Package className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400 mr-2 flex-shrink-0" />
-                  <span>Devoluciones gratuitas</span>
+                  <span>Correo Argentino (de 2 a 5 días hábiles aprox.) NO se despacharán envíos a sucursal.</span>
                 </div>
               </div>
             </CardContent>
@@ -803,5 +998,5 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
