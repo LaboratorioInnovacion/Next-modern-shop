@@ -1,8 +1,16 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Instalar dependencias del sistema
-RUN apk add --no-cache libc6-compat
+# Instalar dependencias del sistema (incluye Chromium para Puppeteer)
+RUN apk add --no-cache \
+    libc6-compat \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 # Copiar archivos de configuración
 COPY package*.json ./
@@ -27,6 +35,16 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Instalar Chromium para Puppeteer en producción
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -34,10 +52,12 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./package.json
+EXPOSE 3000
 
-# Instalar Prisma Client en producción (evitar fallos por peer deps en el runner)
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browserisma Client en producción (evitar fallos por peer deps en el runner)
 RUN npm install --no-audit --no-fund --legacy-peer-deps @prisma/client
 RUN npx prisma generate
 

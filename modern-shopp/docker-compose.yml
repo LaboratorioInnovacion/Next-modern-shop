@@ -37,6 +37,10 @@ services:
       - SECRET=MISECRETO
       - MERCADOPAGO_ACCESS_TOKEN=APP_USR-3904014073520705-081821-ac9642583a0c52da7c3d6aae0fa8eafe-2631277847
       - NEXT_PUBLIC_URL=http://localhost:3000
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+      - DROPPERS_EMAIL=augustodelcampo97@gmail.com
+      - DROPPERS_PASSWORD=Eldragon97
+      - MAX_PAGES=5
     ports:
       - "3000:3000"
     depends_on:
@@ -46,6 +50,9 @@ services:
       - ecommerce_network
     volumes:
       - ./prisma:/app/prisma
+      - ./public/products:/app/public/products
+      - ./scripts/logs:/app/scripts/logs
+      - ./scripts/data:/app/scripts/data
 
   # Opcional: pgAdmin para administración de base de datos
   pgadmin:

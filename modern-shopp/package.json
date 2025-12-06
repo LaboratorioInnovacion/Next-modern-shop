@@ -7,7 +7,9 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "scrape": "node scripts/scraper-main.js",
+    "scrape:dry": "node scripts/scraper-main.js --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
