@@ -137,7 +137,7 @@ jobs:
         docker ps
         
         echo "🔍 Logs de la aplicación:"
-        docker logs ecommerce_app --tail 50
+        docker logs ecommerce_app_prod --tail 50 || true
         
         echo "🌐 Probando endpoint local..."
         for i in {1..10}; do
@@ -157,12 +157,15 @@ jobs:
         echo "🧪 Probando scraper en modo dry-run..."
         cd modern-shopp
         
+        echo "Esperando que el contenedor esté completamente listo..."
+        sleep 10
+        
         echo "Ejecutando scraper de prueba (1 página)..."
-        docker-compose -f docker-compose.prod.yml exec -T -e MAX_PAGES=1 nextjs node scripts/scraper-main.js --dry-run || true
+        docker exec -e MAX_PAGES=1 ecommerce_app_prod node scripts/scraper-main.js --dry-run || true
         
         echo "📋 Verificando archivos generados..."
-        docker-compose -f docker-compose.prod.yml exec -T nextjs ls -lh scripts/data/ || echo "No se generaron archivos"
-        docker-compose -f docker-compose.prod.yml exec -T nextjs ls -lh scripts/logs/ || echo "No se generaron logs"
+        docker exec ecommerce_app_prod ls -lh scripts/data/ 2>/dev/null || echo "No se generaron archivos"
+        docker exec ecommerce_app_prod ls -lh scripts/logs/ 2>/dev/null || echo "No se generaron logs"
 
     - name: Resultado del despliegue
       if: always()
@@ -170,11 +173,11 @@ jobs:
         echo "📊 RESUMEN DEL DESPLIEGUE"
         echo "========================"
         echo "Rama: feature/scraper"
-        echo "Commit: ${{ github.sha }}"
-        echo "Actor: ${{ github.actor }}"
-        echo ""
         echo "🐳 Estado de Docker:"
         docker ps
+        echo ""
+        echo "📝 Últimos logs:"
+        docker logs ecommerce_app_prod --tail 30 || true
         echo ""
         echo "📝 Últimos logs:"
         docker logs ecommerce_app --tail 30 || true

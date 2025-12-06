@@ -1,0 +1,175 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                  ✅ RAMA FEATURE/SCRAPER LISTA                     ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📊 ESTADO ACTUAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Rama:        feature/scraper
+✅ Commits:     3 commits listos
+✅ Workflow:    deploy-scraper.yml configurado
+✅ Docs:        Completas y actualizadas
+⏳ Pendiente:   Push a GitHub
+
+
+📦 ARCHIVOS AGREGADOS (15 archivos):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 .github/
+   └── workflows/
+       └── deploy-scraper.yml         ← Workflow para esta rama
+   └── GITHUB_SECRETS.md              ← Doc de secrets
+
+📁 modern-shopp/
+   ├── Dockerfile                     ← Actualizado con Chromium
+   ├── docker-compose.yml             ← Agregado env vars + volúmenes
+   ├── package.json                   ← Agregado scripts npm
+   ├── SCRAPER-DOCKER.md              ← Guía de uso Docker
+   ├── .env.example                   ← Template variables
+   └── scripts/
+       ├── README.md                  ← Documentación scraper
+       ├── scraper-main.js            ← Script principal
+       ├── run-scraper.ps1            ← Helper Windows
+       ├── run-scraper.sh             ← Helper Linux
+       ├── config/
+       │   └── scraper.config.js      ← Configuración central
+       ├── scrapers/
+       │   └── product-scraper.js     ← Lógica scraping
+       ├── sync/
+       │   └── database-sync.js       ← Sync BD
+       └── utils/
+           └── helpers.js             ← Utilidades
+
+📁 Raíz/
+   └── PUSH-GUIDE.md                  ← Esta guía
+
+
+🎯 CARACTERÍSTICAS IMPLEMENTADAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Scraping con Puppeteer + Chromium
+✅ Rate limiting (2s productos, 5s páginas)
+✅ Validación imágenes (≥400x400px)
+✅ Descarga automática de imágenes
+✅ Sincronización BD (crea/actualiza por SKU)
+✅ Sistema de logs completo
+✅ Reintentos automáticos (3x con backoff)
+✅ Modo dry-run para pruebas
+✅ Compatible con Docker
+✅ GitHub Actions configurado
+✅ Scripts multiplataforma (PS1 + SH)
+
+
+🔐 SECRETS NECESARIOS EN GITHUB:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  ANTES DE HACER PUSH, agrega estos 2 secrets:
+
+1. DROPPERS_EMAIL        → augustodelcampo97@gmail.com
+2. DROPPERS_PASSWORD     → Eldragon97
+
+🔗 Link directo:
+https://github.com/LaboratorioInnovacion/Next-modern-shop/settings/secrets/actions
+
+
+🚀 COMANDOS PARA EJECUTAR:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# 1️⃣  Configurar secrets en GitHub (link arriba)
+
+# 2️⃣  Push de la rama
+git push -u origin feature/scraper
+
+# 3️⃣  Monitorear en GitHub Actions
+# https://github.com/LaboratorioInnovacion/Next-modern-shop/actions
+
+# 4️⃣  Esperar ~15 minutos (construcción + deploy)
+
+# 5️⃣  Ver resultado en tu servidor
+ssh tu-servidor
+docker ps
+docker logs ecommerce_app --tail 50
+
+
+📋 QUÉ HARÁ EL WORKFLOW:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ✅ Checkout del código
+2. ✅ Verifica túnel Cloudflare
+3. ✅ Crea .env.production con todos los secrets
+4. ✅ Para contenedores existentes
+5. ✅ Crea directorios (public/products, scripts/logs, scripts/data)
+6. ✅ Construye imagen Docker con Chromium incluido
+7. ✅ Levanta servicios (postgres + nextjs)
+8. ✅ Ejecuta migraciones Prisma
+9. ✅ Verifica salud de la aplicación
+10. 🧪 Ejecuta test del scraper en modo dry-run (1 página)
+
+
+🛡️  SEGURIDAD:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ El test inicial es en modo dry-run (NO toca BD)
+✅ Rate limiting evita bloqueos
+✅ Credenciales en GitHub Secrets (no en código)
+✅ Logs detallados para auditoría
+✅ Reintentos automáticos ante errores
+✅ No afecta órdenes, usuarios, ni sesiones existentes
+
+
+📊 DESPUÉS DEL DEPLOY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Ejecutar scraper completo (desde servidor)
+docker exec ecommerce_app npm run scrape
+
+# Ejecutar en modo prueba
+docker exec ecommerce_app npm run scrape:dry
+
+# Ver logs
+docker exec ecommerce_app cat scripts/logs/scraper.log
+
+# Ver productos scrapeados
+docker exec ecommerce_db psql -U postgres -d ecommerce -c "SELECT COUNT(*) FROM \"Product\" WHERE sku IS NOT NULL;"
+
+
+🔄 MERGE A MAIN (FUTURO):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Una vez probado y funcionando:
+
+# Opción A: Pull Request (recomendado)
+1. Ve a GitHub
+2. Create Pull Request: feature/scraper → main
+3. Review changes
+4. Merge
+
+# Opción B: Merge directo
+git checkout main
+git merge feature/scraper
+git push origin main
+
+
+⚠️  IMPORTANTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. ⚠️  Asegúrate de agregar los secrets ANTES del push
+2. ⚠️  El primer build tardará ~15 minutos (Chromium es pesado)
+3. ⚠️  Verifica que tu runner self-hosted esté activo
+4. ⚠️  Revisa los logs en GitHub Actions si algo falla
+5. ⚠️  El scraper inicial es en dry-run (seguro, no toca BD)
+
+
+📚 DOCUMENTACIÓN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 PUSH-GUIDE.md           → Esta guía completa
+📖 SCRAPER-DOCKER.md       → Uso del scraper con Docker
+📖 scripts/README.md       → Documentación técnica del scraper
+📖 .github/GITHUB_SECRETS.md → Configuración de secrets
+
+
+╔════════════════════════════════════════════════════════════════════╗
+║                     🎉 ¡TODO LISTO PARA PUSH!                      ║
+║                                                                    ║
+║  Siguiente paso: Agregar secrets y ejecutar:                      ║
+║  git push -u origin feature/scraper                               ║
+╚════════════════════════════════════════════════════════════════════╝
