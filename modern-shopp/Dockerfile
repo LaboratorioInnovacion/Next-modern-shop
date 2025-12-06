@@ -52,12 +52,10 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-EXPOSE 3000
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package.json ./package.json
 
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browserisma Client en producción (evitar fallos por peer deps en el runner)
+# Instalar Prisma Client en producción (evitar fallos por peer deps en el runner)
 RUN npm install --no-audit --no-fund --legacy-peer-deps @prisma/client
 RUN npx prisma generate
 
@@ -68,6 +66,8 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV HOSTNAME=0.0.0.0
 
 # Script de inicio que ejecuta migraciones y luego inicia la app
